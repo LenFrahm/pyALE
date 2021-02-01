@@ -3,6 +3,7 @@ from functools import reduce
 import operator
 import numpy as np
 from math import pow
+from mytime import tic, toc
 
 def tfce(invol, voxel_dims, dh=0.1, E=0.5, H=2.0, negative=False):
     #create empty output volume
@@ -17,7 +18,6 @@ def tfce(invol, voxel_dims, dh=0.1, E=0.5, H=2.0, negative=False):
             #calculate the size of the cluster; first voxel count, then multiplied with the voxel volume in mm
             sizes = np.array(ndimage.sum(thresh, labels, list(range(cluster_count+1))))
             sizes = sizes * reduce(operator.mul, voxel_dims)
-            
             #mask out labeled areas to not perform tfce calculation on the whole brain
             mask = labels > 0
             szs = sizes[labels[mask]]
@@ -29,3 +29,17 @@ def tfce(invol, voxel_dims, dh=0.1, E=0.5, H=2.0, negative=False):
                 outvol[mask] += update_vals
 
     return outvol
+
+def tfce_par(invol, h, voxel_dims=[2,2,2], dh=0.1, H=0.6, E=2):
+    thresh = np.array(invol > h)
+    #look for suprathreshold clusters
+    labels, cluster_count = ndimage.label(thresh)
+    if cluster_count > 0: 
+        #calculate the size of the cluster; first voxel count, then multiplied with the voxel volume in mm
+        sizes = np.array(ndimage.sum(thresh, labels, list(range(cluster_count+1))))
+        sizes = sizes * reduce(operator.mul, voxel_dims)
+        #mask out labeled areas to not perform tfce calculation on the whole brain
+        mask = labels > 0
+        szs = sizes[labels[mask]]
+        update_vals = (pow(h, H) * dh) * np.power(szs, E)
+    return update_vals, mask
