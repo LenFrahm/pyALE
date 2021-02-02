@@ -51,9 +51,8 @@ def simulate_noise(sample_space,
     else:
         nn = np.max(np.bincount(labels[labels>0]))
         
-    z = np.zeros(pad_tmp_shape)
+    z = np.zeros(template_shape)
     z[sample_space[0], sample_space[1], sample_space[2]] = norm.ppf(1-p)
-    z = z[15:z.shape[0]-15,15:z.shape[1]-15, 15:z.shape[2]-15]
     
     # TFCE threshold
     tfce_arr = np.zeros(z.shape)
