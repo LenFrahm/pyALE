@@ -5,7 +5,7 @@ import numpy as np
 from math import pow
 from mytime import tic, toc
 
-def tfce(invol, voxel_dims, dh=0.1, E=0.5, H=2.0, negative=False):
+def tfce(invol, voxel_dims, dh=0.1, E=0.6, H=2.0):
     #create empty output volume
     outvol = np.zeros(invol.shape)
     #loop over range of heights between 0 and the maximum, with a stepsize specified by dh
@@ -20,17 +20,12 @@ def tfce(invol, voxel_dims, dh=0.1, E=0.5, H=2.0, negative=False):
             sizes = sizes * reduce(operator.mul, voxel_dims)
             #mask out labeled areas to not perform tfce calculation on the whole brain
             mask = labels > 0
-            szs = sizes[labels[mask]]
-            update_vals = (pow(h, H) * dh) * np.power(szs, E)
-
-            if negative:
-                outvol[mask] -= update_vals
-            else:
-                outvol[mask] += update_vals
+            szs = sizes[labels[mask]]            
+            outvol[mask] += (pow(h, H) * dh) * np.power(szs, E)
 
     return outvol
 
-def tfce_par(invol, h, voxel_dims=[2,2,2], dh=0.1, H=0.6, E=2):
+def tfce_par(invol, h, voxel_dims=[2,2,2], dh=0.1, E=0.6, H=2):
     thresh = np.array(invol > h)
     #look for suprathreshold clusters
     labels, cluster_count = ndimage.label(thresh)
