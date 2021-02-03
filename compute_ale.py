@@ -84,7 +84,7 @@ def compute_ale(s0, experiments, study):
 
         ale = np.ones(template_shape)
         hx = np.zeros((len(s0),len(bin_edge)))
-        for c, i in enumerate(s0):
+        for i in s0:
             data = np.zeros(pad_tmp_shape)
             for ii in range(experiments.at[i, 'Peaks']):
                 coords = experiments.XYZ[i].T[:,:3][ii]
@@ -199,10 +199,10 @@ def compute_ale(s0, experiments, study):
 
         ale = ale*(ale > cut_max)
         ale_img = nb.Nifti1Image(ale, template.affine)
-        plotting.plot_stat_map(ale_img, bg_img=bg_img, output_file="ALE/Images/" + study + "_vFWE05.png")
+        plotting.plot_stat_map(ale_img, bg_img=bg_img, output_file="ALE/Images/" + study + "_FWE05.png")
         nb.save(ale_img, cwd + '/ALE/Results/' + study + '_FWE05.nii')
 
-        print("Min p-value for vFWE:" + str(sum(nm>np.max(ale))/len(nn)))
+        print("Min p-value for FWE:" + str(sum(nm>np.max(ale))/len(nn)))
 
         # cluster wise family wise error correction
         cut_clust = np.percentile(nn, 95)
