@@ -16,32 +16,11 @@ from simulate_noise import simulate_noise
 from scipy import ndimage
 from joblib import Parallel, delayed
 
-def compute_ale(s0, experiments, study):
+def compute_ale(s_index, experiments, study, noise_repeat):
     
     cwd = os.getcwd()
     mask_folder = cwd + "/MaskenEtc/"
-
-    template = nb.load(mask_folder + "Grey10.nii")
-    template_data = template.get_fdata()
-    template_shape = template_data.shape
-    pad_tmp_shape = [value+30 for value in template_shape]
-
-    bg_img = nb.load(mask_folder + "MNI152.nii")
-
-    prior = np.zeros(template_shape, dtype=bool)
-    prior[template_data > 0.1] = 1
-    uc = 0.001
-    eps = np.finfo(float).eps
-    to_repeat = 10000
-
-    mb = 1
-    for i in s0:
-        mb = mb*(1-np.max(experiments.at[i, 'Kernel']))
-
-    bin_edge = np.arange(0.00005,1-mb+0.001,0.0001)
-    bin_center = np.arange(0,1-mb+0.001,0.0001)
-    step = 1/0.0001
-
+    
     folders_req = ['Volumes', 'NullDistributions', 'VolumesZ', 'VolumesTFCE', 'Results', 'Images', 'Foci']
     folders_req_imgs = ['Foci', 'ALE', 'TFCE']
     try:
@@ -53,6 +32,29 @@ def compute_ale(s0, experiments, study):
                     os.mkdir('ALE/Images/' + sub_folder)
     except FileExistsError:
         pass
+
+    s0 = list(range(len(s_index)))
+    
+    template = nb.load(mask_folder + "Grey10.nii")
+    template_data = template.get_fdata()
+    template_shape = template_data.shape
+    pad_tmp_shape = [value+30 for value in template_shape]
+    bg_img = nb.load(mask_folder + "MNI152.nii")
+
+    prior = np.zeros(template_shape, dtype=bool)
+    prior[template_data > 0.1] = 1
+    
+    
+    
+    uc = 0.001
+    eps = np.finfo(float).eps
+    
+    mb = 1
+    for i in s0:
+        mb = mb*(1-np.max(experiments.at[i, 'Kernel']))
+    bin_edge = np.arange(0.00005,1-mb+0.001,0.0001)
+    bin_center = np.arange(0,1-mb+0.001,0.0001)
+    step = 1/0.0001
 
     if isfile(cwd + '/ALE/Foci/' + study + '.nii'):
         print('{} - loading Foci'.format(study))
@@ -185,7 +187,7 @@ def compute_ale(s0, experiments, study):
                                                                          num_peaks = num_peaks,
                                                                          kernels = kernels,
                                                                          c_null = c_null,
-                                                                         tfce_params = [delta_t, 0.6, 2]) for i in range(to_repeat)))
+                                                                         tfce_params = [delta_t, 0.6, 2]) for i in range(noise_repeat)))
 
 
         simulation_pickle = (nm, nn, nt)
