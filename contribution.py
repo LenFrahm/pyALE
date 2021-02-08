@@ -1,4 +1,4 @@
-from os import getcwd
+import os
 from os.path import isfile
 import numpy as np
 import nibabel as nb
@@ -6,15 +6,15 @@ from scipy import ndimage
 
 def contribution(s_index, experiments, tasks, study):
     
-    cwd = getcwd()
+    cwd = os.getcwd()
     mask_folder = cwd + "/MaskenEtc/"
     try:
-        os.mkdir(cwd + "/ALE/Contribution")
-    except:
+        os.mkdir(cwd + "/ALE/Contribution/")
+    except FileExistsError:
+        print("entered except")
         pass
     
     s0 = list(range(len(s_index)))
-    print(s0)
     
     template = nb.load(mask_folder + "Grey10.nii")
     template_data = template.get_fdata()

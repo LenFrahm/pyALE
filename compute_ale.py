@@ -98,7 +98,7 @@ def compute_ale(s_index, experiments, study, noise_repeat):
                            experiments.at[i, 'Kernel'])
             data = data[15:data.shape[0]-15,15:data.shape[1]-15, 15:data.shape[2]-15]
             bin_idxs, counts = np.unique(np.digitize(data[prior], bin_edge),return_counts=True)
-            hx[c,bin_idxs] = counts
+            hx[i,bin_idxs] = counts
             ale = np.multiply(ale, 1-data)
 
         ale = 1-ale
@@ -153,8 +153,12 @@ def compute_ale(s_index, experiments, study, noise_repeat):
         p = np.array([c_null[i] for i in ale_step])
         p[p < eps] = eps
         z = norm.ppf(1-p)
+        delta_t = np.max(z)/100
 
-        tfce_arr = tfce(invol=z, voxel_dims=template.header.get_zooms())
+        tfce_arr = np.zeros(z.shape)
+        vals, masks = zip(*Parallel(n_jobs=100, backend="threading")(delayed(tfce_par)(invol=z, h=h) for h in np.arange(0, np.max(z), delta_t)))
+        for i in range(len(vals)):
+            tfce_arr[masks[i]] += vals[i]
         tfce_arr[~prior] = np.nan
 
         tfce_img = nb.Nifti1Image(tfce_arr, template.affine)
@@ -183,11 +187,11 @@ def compute_ale(s_index, experiments, study, noise_repeat):
         delta_t = np.max(z)/100
 
         nm, nn, nt = zip(*Parallel(n_jobs=3, verbose=5)(delayed(simulate_noise)(sample_space = sample_space,
-                                                                         s0 = s0,
-                                                                         num_peaks = num_peaks,
-                                                                         kernels = kernels,
-                                                                         c_null = c_null,
-                                                                         tfce_params = [delta_t, 0.6, 2]) for i in range(noise_repeat)))
+                                                                                s0 = s0,
+                                                                                num_peaks = num_peaks,
+                                                                                kernels = kernels,
+                                                                                c_null = c_null,
+                                                                                delta_t = delta_t) for i in range(noise_repeat)))
 
 
         simulation_pickle = (nm, nn, nt)

@@ -10,9 +10,9 @@ def simulate_noise(sample_space,
                    num_peaks,
                    kernels,
                    c_null,
+                   delta_t,
                    eps=np.finfo(float).eps,
                    uc = 0.001,
-                   tfce_params = [0.1, 0.6, 2],
                    template_shape = [91,109,91],
                    pad_tmp_shape=[121, 139, 121],
                    voxel_dims=[2,2,2],
@@ -56,8 +56,7 @@ def simulate_noise(sample_space,
     
     # TFCE threshold
     tfce_arr = np.zeros(z.shape)
-    dh, H, E = tfce_params
-    vals, masks = zip(*Parallel(n_jobs=-1, backend="threading")(delayed(tfce_par)(invol=z, h=h, dh=dh) for h in np.arange(0, np.max(z), dh)))
+    vals, masks = zip(*Parallel(n_jobs=100, backend="threading")(delayed(tfce_par)(invol=z, h=h) for h in np.arange(0, np.max(z), delta_t)))
     for i in range(len(vals)):
         tfce_arr[masks[i]] += vals[i]
     nt = np.max(tfce_arr)

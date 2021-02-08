@@ -74,32 +74,32 @@ numerical variant               	0.002	0.001	0.04
 eeg-fmri                        	0.000	0.000	0.00	 
 
 
-Cluster 3: 24 voxel [Center: -54/4/34] 
-Kim et al., 2012          	0.006	0.025	1.50	9.80	(16)
-Melcher and Gruber, 2006  	0.091	0.381	22.25	36.33	(12)
-Huang et al., 2012 A      	0.003	0.012	0.73	3.72	(30)
-Jiang et al., 2014        	0.023	0.098	5.90	27.81	(21)
-Araneda et al. 2018       	0.110	0.459	26.62	43.66	(16)
-Krönke et al., 2018       	0.175	0.731	43.01	58.96	(139)
+Cluster 3: 30 voxel [Center: -54/4/34] 
+Kim et al., 2012          	0.008	0.028	1.75	9.80	(16)
+Melcher and Gruber, 2006  	0.120	0.399	24.00	41.75	(12)
+Huang et al., 2012 A      	0.004	0.014	0.88	5.00	(30)
+Jiang et al., 2014        	0.030	0.101	6.20	27.81	(21)
+Araneda et al. 2018       	0.132	0.440	26.09	43.66	(16)
+Krönke et al., 2018       	0.206	0.686	41.08	60.57	(139)
 
 
-all                             	0.409	1.706	100.00	 
-visual                          	0.299	1.246	73.38	 
-unmasked                        	0.409	1.706	100.00	 
-fmri                            	0.409	1.706	100.00	 
-manual response                 	0.409	1.706	100.00	 
-i>c                             	0.409	1.706	100.00	 
-other                           	0.409	1.706	100.00	 
-counting                        	0.175	0.731	43.01	 
-numerical                       	0.003	0.012	0.73	 
-spatial                         	0.110	0.459	26.62	 
+all                             	0.501	1.669	100.00	 
+visual                          	0.369	1.229	73.91	 
+unmasked                        	0.501	1.669	100.00	 
+fmri                            	0.501	1.669	100.00	 
+manual response                 	0.501	1.669	100.00	 
+i>c                             	0.501	1.669	100.00	 
+other                           	0.501	1.669	100.00	 
+counting                        	0.206	0.686	41.08	 
+numerical                       	0.004	0.014	0.88	 
+spatial                         	0.132	0.440	26.09	 
 masked                          	0.000	0.000	0.00	 
 auditory                        	0.000	0.000	0.00	 
-gender                          	0.023	0.098	5.90	 
+gender                          	0.030	0.101	6.20	 
 counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.006	0.025	1.50	 
-visual, acoustic                	0.110	0.459	26.62	 
-sizeword                        	0.091	0.381	22.25	 
+spatial variant                 	0.008	0.028	1.75	 
+visual, acoustic                	0.132	0.440	26.09	 
+sizeword                        	0.120	0.399	24.00	 
 semantic-phonetic stroop        	0.000	0.000	0.00	 
 numerical variant               	0.000	0.000	0.00	 
 eeg-fmri                        	0.000	0.000	0.00	 
