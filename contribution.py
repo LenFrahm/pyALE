@@ -3,6 +3,7 @@ from os.path import isfile
 import numpy as np
 import nibabel as nb
 from scipy import ndimage
+from kernel import kernel_conv
 
 def contribution(s_index, experiments, tasks, study):
     
@@ -11,7 +12,6 @@ def contribution(s_index, experiments, tasks, study):
     try:
         os.mkdir(cwd + "/ALE/Contribution/")
     except FileExistsError:
-        print("entered except")
         pass
     
     s0 = list(range(len(s_index)))
@@ -23,16 +23,7 @@ def contribution(s_index, experiments, tasks, study):
 
     exp_data = np.empty((len(s0), template_shape[0], template_shape[1], template_shape[2]))
     for i in s0:
-        data = np.zeros(pad_tmp_shape)
-        for ii in range(experiments.at[i, 'Peaks']):
-            coords = experiments.XYZ[i].T[:,:3][ii]
-            x_range = (coords[0],coords[0]+31)
-            y_range = (coords[1],coords[1]+31)
-            z_range = (coords[2],coords[2]+31)
-            data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]] = \
-            np.maximum(data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]],
-                       experiments.at[i, 'Kernel'])
-        exp_data[i,:,:,:] = (data[15:data.shape[0]-15,15:data.shape[1]-15, 15:data.shape[2]-15])
+        exp_data[i,:,:,:] = kernel_conv(i, experiments, pad_tmp_shape)
 
     for corr_method in ["TFCE", "FWE", "cFWE"]:
         txt = open(cwd + "/ALE/Contribution/" + study + "_" + corr_method + ".txt", "w+")
