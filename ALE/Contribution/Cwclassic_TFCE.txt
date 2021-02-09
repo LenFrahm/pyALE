@@ -1,0 +1,398 @@
+
+Starting with Cwclassic! 
+
+Cwclassic: 37 experiments; 953 unique subjects (average of 25.8 per experiment) 
+
+
+Cluster 1: 16 voxel [Center: 47/25/24] 
+Kerns et al., 2005             	0.020	0.127	5.79	19.13	(13)
+Brass et al., 2005             	0.015	0.096	4.30	12.19	(10)
+Kerns et al., 2005             	0.020	0.127	5.79	19.13	(13)
+Potenza et al., 2003           	0.001	0.004	0.19	0.80	(11)
+Nakao et al., 2005             	0.076	0.477	21.32	34.21	(14)
+Zoccatelli et al., 2010        	0.040	0.250	11.18	23.99	(10)
+Lesh et al., 2013              	0.084	0.522	23.30	36.99	(54)
+Schmidt et al., 2012           	0.001	0.004	0.17	0.75	(31)
+Van't Ent et al., 2014         	0.092	0.575	25.90	44.17	(45)
+Overbeek et al., 2018          	0.007	0.045	2.03	6.15	(21)
+
+
+all                             	0.357	2.229	100.00	 
+visual                          	0.357	2.229	100.00	 
+unmasked                        	0.336	2.102	94.21	 
+fmri                            	0.321	2.006	89.91	 
+cw                              	0.296	1.851	83.03	 
+manual response                 	0.260	1.628	72.92	 
+i>c                             	0.161	1.006	45.26	 
+colorword                       	0.196	1.227	54.93	 
+i>nrb                           	0.196	1.223	54.74	 
+neutral                         	0.196	1.223	54.74	 
+colorword variant               	0.100	0.624	28.10	 
+other                           	0.060	0.377	16.97	 
+words                           	0.196	1.222	54.71	 
+xxx                             	0.000	0.000	0.02	 
+letters                         	0.000	0.000	0.02	 
+no no manual response-verbal    	0.036	0.224	10.11	 
+pet                             	0.036	0.223	10.09	 
+symbols                         	0.000	0.000	0.00	 
+counting                        	0.000	0.000	0.00	 
+percent sign                    	0.000	0.000	0.00	 
+numerical                       	0.020	0.127	5.79	 
+spatial                         	0.040	0.250	11.18	 
+masked                          	0.020	0.127	5.79	 
+auditory                        	0.000	0.000	0.00	 
+gender                          	0.000	0.000	0.00	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	0.000	0.000	0.00	 
+crosses                         	0.000	0.000	0.00	 
+spatial words (front, top--)    	0.015	0.096	4.30	 
+sizeword                        	0.000	0.000	0.00	 
+animals                         	0.020	0.127	5.79	 
+animal words                    	0.000	0.000	0.00	 
+
+
+Cluster 2: 381 voxel [Center: 36/22/-4] 
+Ye et al., 2009                	0.218	0.057	3.20	40.69	(19)
+Zhu et al., 2013               	0.674	0.177	7.17	31.71	(26)
+Silton et al., 2010            	0.779	0.205	8.36	31.03	(30)
+Potenza et al., 2003           	0.384	0.101	5.18	40.71	(11)
+Nakao et al., 2005             	0.554	0.146	6.95	40.40	(14)
+Zoccatelli et al., 2010        	0.421	0.111	5.40	39.86	(10)
+Chen et al., 2018              	0.694	0.182	7.36	33.47	(36)
+DeVito et al., 2012            	0.166	0.044	2.49	41.03	(12)
+Hough et al., 2016             	0.532	0.140	5.99	37.68	(25)
+Piai et al., 2013              	0.686	0.180	9.11	53.73	(23)
+Schmidt et al., 2012           	1.068	0.280	11.83	34.12	(31)
+Barkley-Levenson et al., 2018  	0.630	0.165	7.48	50.29	(105)
+Hough et al. 2017              	0.532	0.140	5.99	37.68	(25)
+Kühn et al., 2016              	0.316	0.083	4.19	52.00	(19)
+Overbeek et al., 2018          	0.783	0.206	8.47	23.22	(21)
+Portes et al., 2019 B          	0.037	0.010	0.55	18.61	(21)
+
+
+all                             	8.495	2.230	100.00	 
+visual                          	7.964	2.090	94.01	 
+unmasked                        	6.579	1.727	77.47	 
+fmri                            	8.269	2.170	96.68	 
+cw                              	6.282	1.649	72.89	 
+manual response                 	5.314	1.395	61.76	 
+i>c                             	5.465	1.434	64.74	 
+colorword                       	3.565	0.936	42.65	 
+i>nrb                           	3.031	0.795	35.26	 
+neutral                         	3.031	0.795	35.26	 
+colorword variant               	2.717	0.713	30.24	 
+other                           	2.213	0.581	27.11	 
+words                           	1.935	0.508	22.70	 
+xxx                             	0.779	0.205	8.36	 
+letters                         	0.779	0.205	8.36	 
+no no manual response-verbal    	1.005	0.264	11.68	 
+pet                             	0.226	0.059	3.32	 
+symbols                         	0.317	0.083	4.19	 
+counting                        	0.000	0.000	0.00	 
+percent sign                    	0.316	0.083	4.19	 
+numerical                       	0.005	0.001	0.08	 
+spatial                         	0.421	0.111	5.40	 
+masked                          	1.917	0.503	22.53	 
+auditory                        	0.532	0.140	5.99	 
+gender                          	0.532	0.140	5.99	 
+counting variant                	0.686	0.180	9.11	 
+spatial variant                 	0.569	0.149	6.53	 
+crosses                         	0.000	0.000	0.00	 
+spatial words (front, top--)    	0.002	0.001	0.03	 
+sizeword                        	0.000	0.000	0.00	 
+animals                         	0.005	0.001	0.08	 
+animal words                    	0.000	0.000	0.00	 
+
+
+Cluster 3: 1465 voxel [Center: 0/20/42] 
+Kerns et al., 2005             	0.822	0.056	2.75	31.40	(13)
+Pardo et al., 1990             	0.997	0.068	4.25	46.92	(8)
+Carter et al., 1995            	0.513	0.035	1.91	43.27	(14)
+Ye et al., 2009                	0.911	0.062	2.40	17.91	(19)
+Brass et al., 2005             	0.877	0.060	2.40	14.62	(10)
+Becker et al., 2008            	0.883	0.060	2.38	23.25	(17)
+Zhu et al., 2013               	0.307	0.021	1.42	70.24	(26)
+Fan et al., 2003               	0.105	0.007	0.51	32.45	(12)
+Coderre et al., 2008           	2.275	0.155	9.39	52.45	(9)
+Silton et al., 2010            	1.455	0.099	4.94	58.04	(30)
+Kerns et al., 2005             	0.822	0.056	2.75	31.40	(13)
+Videbech et al., 2003          	2.031	0.139	7.34	47.41	(46)
+Ravnkilde et al., 2002         	2.031	0.139	7.34	47.41	(46)
+Potenza et al., 2003           	0.898	0.061	2.69	23.07	(11)
+Nakao et al., 2005             	1.341	0.092	5.69	56.05	(14)
+Zoccatelli et al., 2010        	0.811	0.055	2.50	18.11	(10)
+Chen et al., 2018              	0.794	0.054	2.48	40.51	(36)
+DeVito et al., 2012            	0.688	0.047	2.17	46.64	(12)
+Fechir et al., 2010            	0.763	0.052	2.56	27.50	(16)
+Lesh et al., 2013              	0.472	0.032	1.73	72.42	(54)
+Schmidt et al., 2012           	2.717	0.185	9.70	64.84	(31)
+Van't Ent et al., 2014         	0.029	0.002	0.15	42.15	(45)
+Barkley-Levenson et al., 2018  	1.386	0.095	5.80	47.96	(105)
+Kühn et al., 2016              	0.849	0.058	2.55	22.16	(19)
+Morgenroth et al., 2019        	1.218	0.083	4.51	73.76	(39)
+Overbeek et al., 2018          	0.369	0.025	1.75	66.26	(21)
+Portes et al., 2019 A          	0.005	0.000	0.03	5.53	(19)
+Ghavidel et al. 2020           	1.554	0.106	5.90	72.55	(18)
+
+
+all                             	27.922	1.906	100.00	 
+visual                          	27.922	1.906	100.00	 
+unmasked                        	26.306	1.796	94.77	 
+fmri                            	22.399	1.529	82.72	 
+cw                              	22.983	1.569	82.95	 
+manual response                 	16.005	1.093	60.73	 
+i>c                             	15.883	1.084	56.73	 
+colorword                       	16.000	1.092	56.77	 
+i>nrb                           	12.039	0.822	43.27	 
+neutral                         	12.039	0.822	43.27	 
+colorword variant               	6.983	0.477	26.19	 
+other                           	4.939	0.337	17.05	 
+words                           	5.020	0.343	18.07	 
+xxx                             	5.288	0.361	20.26	 
+letters                         	5.288	0.361	20.26	 
+no no manual response-verbal    	6.978	0.476	22.22	 
+pet                             	5.523	0.377	17.28	 
+symbols                         	1.731	0.118	4.93	 
+counting                        	2.543	0.174	9.25	 
+percent sign                    	0.849	0.058	2.55	 
+numerical                       	0.822	0.056	2.75	 
+spatial                         	1.574	0.107	5.05	 
+masked                          	1.616	0.110	5.23	 
+auditory                        	0.000	0.000	0.00	 
+gender                          	0.000	0.000	0.00	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	0.000	0.000	0.00	 
+crosses                         	0.883	0.060	2.38	 
+spatial words (front, top--)    	0.877	0.060	2.40	 
+sizeword                        	0.000	0.000	0.00	 
+animals                         	0.822	0.056	2.75	 
+animal words                    	0.513	0.035	1.91	 
+
+
+Cluster 4: 569 voxel [Center: -32/-56/46] 
+Carter et al., 1995            	0.567	0.100	5.11	27.25	(14)
+Ye et al., 2009                	0.445	0.078	4.10	44.91	(19)
+Becker et al., 2008            	0.249	0.044	2.51	58.88	(17)
+Grandjean et al., 2012OR2013   	0.379	0.067	3.59	58.25	(25)
+Zhu et al., 2013               	0.409	0.072	3.66	50.79	(26)
+Fan et al., 2003               	0.025	0.004	0.27	20.08	(12)
+Coderre et al., 2008           	0.071	0.012	0.76	32.75	(9)
+Silton et al., 2010            	0.683	0.120	5.24	45.98	(30)
+Potenza et al., 2003           	0.175	0.031	1.67	39.01	(11)
+Nakao et al., 2005             	0.026	0.005	0.26	7.52	(14)
+Zoccatelli et al., 2010        	0.409	0.072	3.41	40.42	(10)
+Chen et al., 2018              	0.447	0.079	3.71	57.86	(36)
+DeVito et al., 2012            	0.696	0.122	5.73	27.34	(12)
+Fechir et al., 2010            	0.728	0.128	5.31	27.72	(16)
+Lesh et al., 2013              	1.171	0.206	9.64	53.57	(54)
+Schmidt et al., 2012           	0.776	0.136	5.68	33.09	(31)
+Terry et al., 2012             	0.736	0.129	5.53	29.86	(20)
+Van't Ent et al., 2014         	0.373	0.065	3.39	58.77	(45)
+Barkley-Levenson et al., 2018  	0.683	0.120	5.27	43.87	(105)
+Overbeek et al., 2018          	0.790	0.139	5.40	24.61	(21)
+Portes et al., 2019 A          	0.523	0.092	4.36	50.13	(19)
+Peven et al. 2019              	1.226	0.215	8.59	33.00	(50)
+Kozasa et al. 2018             	0.932	0.164	6.80	62.20	(33)
+
+
+all                             	12.518	2.200	100.00	 
+visual                          	12.518	2.200	100.00	 
+unmasked                        	12.071	2.121	96.29	 
+fmri                            	11.445	2.011	89.80	 
+cw                              	7.920	1.392	65.24	 
+manual response                 	8.322	1.463	65.19	 
+i>c                             	7.007	1.232	53.61	 
+colorword                       	4.220	0.742	35.94	 
+i>nrb                           	5.511	0.968	46.39	 
+neutral                         	5.511	0.968	46.39	 
+colorword variant               	3.700	0.650	29.30	 
+other                           	4.598	0.808	34.76	 
+words                           	3.606	0.634	29.93	 
+xxx                             	1.276	0.224	10.36	 
+letters                         	1.276	0.224	10.36	 
+no no manual response-verbal    	1.756	0.309	15.44	 
+pet                             	1.073	0.189	10.20	 
+symbols                         	0.629	0.110	6.10	 
+counting                        	2.529	0.444	19.23	 
+percent sign                    	0.000	0.000	0.00	 
+numerical                       	0.000	0.000	0.00	 
+spatial                         	1.137	0.200	8.72	 
+masked                          	0.447	0.079	3.71	 
+auditory                        	0.000	0.000	0.00	 
+gender                          	0.000	0.000	0.00	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	0.000	0.000	0.00	 
+crosses                         	0.629	0.110	6.10	 
+spatial words (front, top--)    	0.000	0.000	0.00	 
+sizeword                        	0.932	0.164	6.80	 
+animals                         	0.000	0.000	0.00	 
+animal words                    	0.567	0.100	5.11	 
+
+
+Cluster 5: 1578 voxel [Center: -42/12/28] 
+Kerns et al., 2005             	1.071	0.068	4.26	43.87	(13)
+Pardo et al., 1990             	0.247	0.016	1.14	47.87	(8)
+Ye et al., 2009                	0.904	0.057	2.15	22.16	(19)
+Brass et al., 2005             	0.762	0.048	2.61	44.02	(10)
+Becker et al., 2008            	1.984	0.126	5.73	60.46	(17)
+Grandjean et al., 2012OR2013   	1.364	0.086	3.27	69.62	(25)
+Zhu et al., 2013               	0.523	0.033	2.34	48.41	(26)
+Fan et al., 2003               	0.304	0.019	1.34	59.64	(12)
+Coderre et al., 2008           	0.784	0.050	1.92	28.12	(9)
+Silton et al., 2010            	0.743	0.047	1.93	52.33	(30)
+Kerns et al., 2005             	1.071	0.068	4.26	43.87	(13)
+Videbech et al., 2003          	1.745	0.111	4.46	50.48	(46)
+Ravnkilde et al., 2002         	0.585	0.037	1.57	39.02	(46)
+Nakao et al., 2005             	1.456	0.092	4.18	39.27	(14)
+Zoccatelli et al., 2010        	0.929	0.059	1.84	9.45	(10)
+Mead et al., 2002              	0.893	0.057	1.82	19.66	(18)
+Chen et al., 2018              	0.555	0.035	2.20	57.60	(36)
+Fechir et al., 2010            	2.024	0.128	5.87	64.50	(16)
+Lesh et al., 2013              	0.921	0.058	1.86	19.53	(54)
+Schmidt et al., 2012           	0.947	0.060	1.71	13.91	(31)
+Van't Ent et al., 2014         	1.962	0.124	5.72	69.82	(45)
+Barkley-Levenson et al., 2018  	0.752	0.048	2.60	47.82	(105)
+Kühn et al., 2016              	0.583	0.037	1.96	61.06	(19)
+Morgenroth et al., 2019        	2.173	0.138	7.04	83.33	(39)
+Overbeek et al., 2018          	0.852	0.054	2.01	31.17	(21)
+Portes et al., 2019 A          	0.874	0.055	2.13	29.04	(19)
+Portes et al., 2019 B          	1.124	0.071	2.82	60.17	(21)
+Peven et al. 2019              	2.680	0.170	7.74	55.69	(50)
+Kozasa et al. 2018             	1.995	0.126	7.56	68.73	(33)
+Ghavidel et al. 2020           	1.104	0.070	3.94	55.48	(18)
+
+
+all                             	33.911	2.149	100.00	 
+visual                          	33.911	2.149	100.00	 
+unmasked                        	32.286	2.046	93.54	 
+fmri                            	26.082	1.653	77.53	 
+cw                              	23.502	1.489	68.34	 
+manual response                 	20.729	1.314	62.06	 
+i>c                             	21.741	1.378	63.86	 
+colorword                       	17.224	1.092	51.30	 
+i>nrb                           	12.170	0.771	36.14	 
+neutral                         	12.170	0.771	36.14	 
+colorword variant               	6.278	0.398	17.04	 
+other                           	10.409	0.660	31.66	 
+words                           	4.733	0.300	15.25	 
+xxx                             	3.506	0.222	9.92	 
+letters                         	3.506	0.222	9.92	 
+no no manual response-verbal    	8.572	0.543	24.40	 
+pet                             	7.829	0.496	22.47	 
+symbols                         	3.932	0.249	10.96	 
+counting                        	3.265	0.207	9.31	 
+percent sign                    	0.583	0.037	1.96	 
+numerical                       	1.071	0.068	4.26	 
+spatial                         	2.954	0.187	7.71	 
+masked                          	1.625	0.103	6.46	 
+auditory                        	0.000	0.000	0.00	 
+gender                          	0.000	0.000	0.00	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	1.124	0.071	2.82	 
+crosses                         	3.348	0.212	9.00	 
+spatial words (front, top--)    	0.762	0.048	2.61	 
+sizeword                        	1.995	0.126	7.56	 
+animals                         	1.071	0.068	4.26	 
+animal words                    	0.000	0.000	0.00	 
+
+
+Cluster 6: 360 voxel [Center: -36/20/-4] 
+Kerns et al., 2005             	0.018	0.005	0.30	10.70	(13)
+Pardo et al., 1990             	0.204	0.057	2.80	33.52	(8)
+Ye et al., 2009                	0.299	0.083	4.55	46.94	(19)
+Becker et al., 2008            	0.409	0.114	6.17	51.68	(17)
+Silton et al., 2010            	0.615	0.171	7.28	32.17	(30)
+Kerns et al., 2005             	0.018	0.005	0.30	10.70	(13)
+Videbech et al., 2003          	0.678	0.188	8.03	28.16	(46)
+Ravnkilde et al., 2002         	0.678	0.188	8.03	28.16	(46)
+Potenza et al., 2003           	0.188	0.052	2.66	39.34	(11)
+Zoccatelli et al., 2010        	0.614	0.171	7.58	20.28	(10)
+DeVito et al., 2012            	0.276	0.077	4.24	44.67	(12)
+Hough et al., 2016             	0.416	0.116	7.03	47.98	(25)
+Schmidt et al., 2012           	0.950	0.264	12.23	48.84	(31)
+Barkley-Levenson et al., 2018  	1.069	0.297	14.68	43.23	(105)
+Hough et al. 2017              	0.416	0.116	7.03	47.98	(25)
+Morgenroth et al., 2019        	0.483	0.134	7.09	46.09	(39)
+
+
+all                             	7.332	2.037	100.00	 
+visual                          	6.916	1.921	92.97	 
+unmasked                        	6.898	1.916	92.67	 
+fmri                            	5.928	1.647	80.95	 
+cw                              	5.191	1.442	70.04	 
+manual response                 	3.171	0.881	43.70	 
+i>c                             	5.599	1.555	74.99	 
+colorword                       	3.964	1.101	53.56	 
+i>nrb                           	1.734	0.482	25.01	 
+neutral                         	1.734	0.482	25.01	 
+colorword variant               	1.227	0.341	16.48	 
+other                           	2.142	0.595	29.96	 
+words                           	0.710	0.197	11.57	 
+xxx                             	0.615	0.171	7.28	 
+letters                         	0.615	0.171	7.28	 
+no no manual response-verbal    	2.019	0.561	26.33	 
+pet                             	1.404	0.390	19.05	 
+symbols                         	0.409	0.114	6.17	 
+counting                        	0.678	0.188	8.03	 
+percent sign                    	0.000	0.000	0.00	 
+numerical                       	0.018	0.005	0.30	 
+spatial                         	0.614	0.171	7.58	 
+masked                          	0.434	0.121	7.33	 
+auditory                        	0.416	0.116	7.03	 
+gender                          	0.416	0.116	7.03	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	0.416	0.116	7.03	 
+crosses                         	0.409	0.114	6.17	 
+spatial words (front, top--)    	0.000	0.000	0.00	 
+sizeword                        	0.000	0.000	0.00	 
+animals                         	0.018	0.005	0.30	 
+animal words                    	0.000	0.000	0.00	 
+
+
+Cluster 7: 83 voxel [Center: -50/-54/-16] 
+Ye et al., 2009                	0.273	0.329	15.70	38.31	(19)
+Brass et al., 2005             	0.005	0.006	0.29	1.89	(10)
+Grandjean et al., 2012OR2013   	0.034	0.041	2.08	27.69	(25)
+Zhu et al., 2013               	0.059	0.072	3.44	33.68	(26)
+Silton et al., 2010            	0.227	0.274	12.85	42.51	(30)
+Hough et al., 2016             	0.144	0.174	8.38	41.00	(25)
+Schmidt et al., 2012           	0.055	0.066	3.33	32.90	(31)
+Van't Ent et al., 2014         	0.299	0.360	16.86	38.92	(45)
+Hough et al. 2017              	0.144	0.174	8.38	41.00	(25)
+Peven et al. 2019              	0.496	0.597	28.68	48.81	(50)
+
+
+all                             	1.736	2.092	100.00	 
+visual                          	1.592	1.918	91.62	 
+unmasked                        	1.592	1.918	91.62	 
+fmri                            	1.424	1.716	81.93	 
+cw                              	0.952	1.147	54.56	 
+manual response                 	0.909	1.095	52.32	 
+i>c                             	1.267	1.526	72.96	 
+colorword                       	0.599	0.721	34.37	 
+i>nrb                           	0.469	0.566	27.04	 
+neutral                         	0.469	0.566	27.04	 
+colorword variant               	0.354	0.426	20.19	 
+other                           	0.784	0.945	45.44	 
+words                           	0.209	0.251	12.11	 
+xxx                             	0.227	0.274	12.85	 
+letters                         	0.227	0.274	12.85	 
+no no manual response-verbal    	0.539	0.650	30.92	 
+pet                             	0.312	0.376	18.07	 
+symbols                         	0.034	0.041	2.08	 
+counting                        	0.496	0.597	28.68	 
+percent sign                    	0.000	0.000	0.00	 
+numerical                       	0.000	0.000	0.00	 
+spatial                         	0.000	0.000	0.00	 
+masked                          	0.144	0.174	8.38	 
+auditory                        	0.144	0.174	8.38	 
+gender                          	0.144	0.174	8.38	 
+counting variant                	0.000	0.000	0.00	 
+spatial variant                 	0.144	0.174	8.38	 
+crosses                         	0.034	0.041	2.08	 
+spatial words (front, top--)    	0.005	0.006	0.29	 
+sizeword                        	0.000	0.000	0.00	 
+animals                         	0.000	0.000	0.00	 
+animal words                    	0.000	0.000	0.00	 
+
+Done with TFCE!

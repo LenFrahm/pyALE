@@ -1,0 +1,86 @@
+
+Starting with Cwvariant! 
+
+Cwvariant: 21 experiments; 553 unique subjects (average of 26.3 per experiment) 
+
+
+Cluster 4: 108 voxel [Center: 2/18/48] 
+Milham et Banich, 2005    	0.201	0.186	7.08	31.60	(18)
+Basten et al., 2011       	0.426	0.394	14.47	31.60	(46)
+Chen et al., 2013         	0.142	0.132	5.18	33.24	(23)
+Köhler et al., 2016       	0.270	0.250	9.23	35.89	(45)
+Mathis et al., 2009 C     	0.009	0.008	0.32	3.75	(12)
+Van Veen et al., 2005     	0.164	0.152	5.78	33.19	(14)
+Coderre et al., 2013      	0.151	0.140	5.43	28.67	(14)
+Jiang et al., 2016        	0.189	0.175	6.58	32.18	(24)
+Purmann & Pollmann, 2015  	0.221	0.204	7.66	34.56	(18)
+Shin & Kim 2015           	0.286	0.265	10.20	36.37	(43)
+Agostini et al 2017       	0.376	0.348	12.82	27.28	(17)
+Wagner et al. 2016        	0.433	0.401	15.15	39.33	(40)
+
+
+all                             	2.870	2.658	100.00	 
+visual                          	2.870	2.658	100.00	 
+unmasked                        	2.669	2.472	92.92	 
+fmri                            	2.870	2.658	100.00	 
+cw                              	2.870	2.658	100.00	 
+manual response                 	2.870	2.658	100.00	 
+i>c                             	2.870	2.658	100.00	 
+colorword variant               	2.870	2.658	100.00	 
+masked                          	0.201	0.186	7.08	 
+
+
+Cluster 5: 60 voxel [Center: -30/-60/42] 
+Milham et Banich, 2005    	0.174	0.291	11.05	29.86	(18)
+Basten et al., 2011       	0.263	0.439	16.27	29.54	(46)
+Kim et al., 2010          	0.018	0.030	1.17	6.64	(12)
+Chen et al., 2013         	0.147	0.246	9.84	31.86	(23)
+Luethi et al., 2016       	0.232	0.386	14.26	34.66	(88)
+Mathis et al., 2009 B     	0.005	0.008	0.30	2.83	(12)
+Schulte et al., 2012      	0.176	0.294	10.96	30.40	(17)
+Wallentin et al., 2015    	0.058	0.097	3.66	22.43	(49)
+Coderre et al., 2013      	0.070	0.116	4.66	27.91	(14)
+Purmann & Pollmann, 2015  	0.121	0.202	8.10	33.12	(18)
+Shin & Kim 2015           	0.134	0.223	8.92	38.70	(43)
+Agostini et al 2017       	0.149	0.248	9.43	30.40	(17)
+Wagner et al. 2016        	0.022	0.036	1.35	8.33	(40)
+
+
+all                             	1.570	2.617	100.00	 
+visual                          	1.570	2.617	100.00	 
+unmasked                        	1.396	2.327	88.95	 
+fmri                            	1.570	2.617	100.00	 
+cw                              	1.570	2.617	100.00	 
+manual response                 	1.570	2.617	100.00	 
+i>c                             	1.570	2.617	100.00	 
+colorword variant               	1.570	2.617	100.00	 
+masked                          	0.174	0.291	11.05	 
+
+
+Cluster 7: 166 voxel [Center: -44/12/30] 
+Zysset et al., 2001       	0.378	0.228	7.28	19.52	(9)
+Milham et Banich, 2005    	0.474	0.285	9.08	26.70	(18)
+Basten et al., 2011       	0.389	0.234	7.60	31.42	(46)
+Kim et al., 2014          	0.414	0.250	8.12	28.92	(18)
+Köhler et al., 2016       	0.486	0.293	9.34	30.08	(45)
+Luethi et al., 2016       	0.077	0.047	1.76	32.21	(88)
+Mathis et al., 2009 B     	0.055	0.033	1.18	11.36	(12)
+Mathis et al., 2009 C     	0.090	0.054	2.02	22.93	(12)
+Schulte et al., 2012      	0.500	0.301	9.80	20.29	(17)
+Wallentin et al., 2015    	0.557	0.335	10.61	24.64	(49)
+Shin & Kim 2015           	0.393	0.237	8.15	37.36	(43)
+Agostini et al 2017       	0.600	0.361	12.35	29.87	(17)
+Wagner et al. 2016        	0.637	0.384	12.71	33.29	(40)
+
+
+all                             	5.051	3.043	100.00	 
+visual                          	5.051	3.043	100.00	 
+unmasked                        	4.577	2.757	90.92	 
+fmri                            	5.051	3.043	100.00	 
+cw                              	5.051	3.043	100.00	 
+manual response                 	5.051	3.043	100.00	 
+i>c                             	5.051	3.043	100.00	 
+colorword variant               	5.051	3.043	100.00	 
+masked                          	0.474	0.285	9.08	 
+
+Done with FWE!

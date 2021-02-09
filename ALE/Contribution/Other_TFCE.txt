@@ -17,25 +17,31 @@ Krönke et al., 2018       	0.368	0.228	14.63	64.98	(139)
 
 
 all                             	2.357	1.464	100.00	 
-visual                          	2.169	1.347	91.43	 
+visual                          	2.357	1.464	100.00	 
 unmasked                        	1.904	1.182	80.85	 
-fmri                            	2.357	1.464	100.00	 
-manual response                 	1.758	1.092	74.57	 
-i>c                             	2.357	1.464	100.00	 
-other                           	2.357	1.464	100.00	 
-counting                        	0.368	0.228	14.63	 
-numerical                       	0.983	0.610	41.79	 
-spatial                         	0.188	0.117	8.57	 
-masked                          	0.453	0.281	19.15	 
-auditory                        	0.000	0.000	0.00	 
-gender                          	0.000	0.000	0.00	 
-counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.373	0.232	16.60	 
-visual, acoustic                	0.188	0.117	8.57	 
-sizeword                        	0.187	0.116	8.18	 
-semantic-phonetic stroop        	0.000	0.000	0.00	 
-numerical variant               	0.258	0.160	10.23	 
-eeg-fmri                        	0.000	0.000	0.00	 
+fmri                            	1.454	0.903	60.76	 
+cw                              	1.536	0.954	66.22	 
+manual response                 	0.376	0.233	16.76	 
+i>c                             	1.211	0.752	51.12	 
+colorword                       	1.348	0.838	58.03	 
+i>nrb                           	1.146	0.712	48.88	 
+neutral                         	1.146	0.712	48.88	 
+colorword variant               	0.187	0.116	8.18	 
+other                           	0.821	0.510	33.78	 
+words                           	0.661	0.411	28.33	 
+xxx                             	0.258	0.160	10.23	 
+letters                         	0.258	0.160	10.23	 
+no no manual response-verbal    	1.160	0.721	49.46	 
+pet                             	0.903	0.561	39.24	 
+symbols                         	0.227	0.141	10.32	 
+counting                        	0.000	0.000	0.00	 
+numerical                       	0.453	0.281	19.15	 
+spatial                         	0.368	0.228	14.63	 
+masked                          	0.453	0.282	19.15	 
+crosses                         	0.227	0.141	10.32	 
+spatial words (front, top--)    	0.146	0.091	6.28	 
+animals                         	0.515	0.320	22.05	 
+animal words                    	0.000	0.000	0.00	 
 
 
 Cluster 2: 300 voxel [Center: -42/-38/44] 
@@ -53,25 +59,31 @@ Robertson et al., 2015    	0.268	0.089	6.41	65.85	(16)
 
 
 all                             	4.455	1.485	100.00	 
-visual                          	4.078	1.359	91.37	 
-unmasked                        	3.911	1.304	88.20	 
-fmri                            	4.455	1.485	100.00	 
-manual response                 	2.886	0.962	64.54	 
-i>c                             	4.455	1.485	100.00	 
-other                           	4.455	1.485	100.00	 
-counting                        	0.504	0.168	11.48	 
-numerical                       	0.894	0.298	20.07	 
-spatial                         	0.846	0.282	20.03	 
-masked                          	0.545	0.182	11.80	 
-auditory                        	0.000	0.000	0.00	 
-gender                          	0.490	0.163	11.00	 
-counting variant                	0.545	0.182	11.80	 
-spatial variant                 	1.175	0.392	25.57	 
-visual, acoustic                	0.378	0.126	8.63	 
-sizeword                        	0.000	0.000	0.01	 
-semantic-phonetic stroop        	0.000	0.000	0.00	 
-numerical variant               	0.002	0.001	0.04	 
-eeg-fmri                        	0.000	0.000	0.00	 
+visual                          	4.455	1.485	100.00	 
+unmasked                        	4.455	1.485	100.00	 
+fmri                            	1.857	0.619	42.87	 
+cw                              	3.255	1.085	72.47	 
+manual response                 	0.654	0.218	15.29	 
+i>c                             	1.893	0.631	43.63	 
+colorword                       	3.246	1.082	72.23	 
+i>nrb                           	2.562	0.854	56.37	 
+neutral                         	2.562	0.854	56.37	 
+colorword variant               	0.009	0.003	0.23	 
+other                           	1.201	0.400	27.53	 
+words                           	1.397	0.466	31.21	 
+xxx                             	0.010	0.003	0.27	 
+letters                         	0.010	0.003	0.27	 
+no no manual response-verbal    	2.601	0.867	57.18	 
+pet                             	2.599	0.866	57.13	 
+symbols                         	1.155	0.385	24.89	 
+counting                        	0.697	0.232	16.07	 
+numerical                       	0.000	0.000	0.00	 
+spatial                         	0.504	0.168	11.47	 
+masked                          	0.000	0.000	0.00	 
+crosses                         	1.155	0.385	24.89	 
+spatial words (front, top--)    	0.565	0.188	12.48	 
+animals                         	0.626	0.209	13.65	 
+animal words                    	0.206	0.069	5.07	 
 
 
 Cluster 3: 30 voxel [Center: -54/4/34] 
@@ -84,24 +96,30 @@ Krönke et al., 2018       	0.206	0.686	41.08	60.57	(139)
 
 
 all                             	0.501	1.669	100.00	 
-visual                          	0.369	1.229	73.91	 
+visual                          	0.501	1.669	100.00	 
 unmasked                        	0.501	1.669	100.00	 
-fmri                            	0.501	1.669	100.00	 
-manual response                 	0.501	1.669	100.00	 
-i>c                             	0.501	1.669	100.00	 
-other                           	0.501	1.669	100.00	 
-counting                        	0.206	0.686	41.08	 
-numerical                       	0.004	0.014	0.88	 
-spatial                         	0.132	0.440	26.09	 
+fmri                            	0.488	1.627	97.37	 
+cw                              	0.265	0.882	52.72	 
+manual response                 	0.252	0.839	50.09	 
+i>c                             	0.488	1.627	97.37	 
+colorword                       	0.145	0.483	28.72	 
+i>nrb                           	0.013	0.042	2.63	 
+neutral                         	0.013	0.042	2.63	 
+colorword variant               	0.120	0.399	24.00	 
+other                           	0.236	0.787	47.28	 
+words                           	0.004	0.014	0.88	 
+xxx                             	0.000	0.000	0.00	 
+letters                         	0.000	0.000	0.00	 
+no no manual response-verbal    	0.013	0.042	2.63	 
+pet                             	0.013	0.042	2.63	 
+symbols                         	0.008	0.028	1.75	 
+counting                        	0.030	0.101	6.20	 
+numerical                       	0.000	0.000	0.00	 
+spatial                         	0.206	0.686	41.08	 
 masked                          	0.000	0.000	0.00	 
-auditory                        	0.000	0.000	0.00	 
-gender                          	0.030	0.101	6.20	 
-counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.008	0.028	1.75	 
-visual, acoustic                	0.132	0.440	26.09	 
-sizeword                        	0.120	0.399	24.00	 
-semantic-phonetic stroop        	0.000	0.000	0.00	 
-numerical variant               	0.000	0.000	0.00	 
-eeg-fmri                        	0.000	0.000	0.00	 
+crosses                         	0.008	0.028	1.75	 
+spatial words (front, top--)    	0.000	0.000	0.00	 
+animals                         	0.004	0.014	0.88	 
+animal words                    	0.000	0.000	0.00	 
 
 Done with TFCE!
