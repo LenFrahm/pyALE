@@ -15,6 +15,7 @@ from scipy.io import loadmat
 from simulate_noise import simulate_noise
 from scipy import ndimage
 from joblib import Parallel, delayed
+from kernel import kernel_conv
 
 def compute_ale(s_index, experiments, study, noise_repeat):
     
@@ -87,16 +88,7 @@ def compute_ale(s_index, experiments, study, noise_repeat):
         ale = np.ones(template_shape)
         hx = np.zeros((len(s0),len(bin_edge)))
         for i in s0:
-            data = np.zeros(pad_tmp_shape)
-            for ii in range(experiments.at[i, 'Peaks']):
-                coords = experiments.XYZ[i].T[:,:3][ii]
-                x_range = (coords[0],coords[0]+31)
-                y_range = (coords[1],coords[1]+31)
-                z_range = (coords[2],coords[2]+31)
-                data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]] = \
-                np.maximum(data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]],
-                           experiments.at[i, 'Kernel'])
-            data = data[15:data.shape[0]-15,15:data.shape[1]-15, 15:data.shape[2]-15]
+            data = kernel_conv(i, experiments, pad_tmp_shape)
             bin_idxs, counts = np.unique(np.digitize(data[prior], bin_edge),return_counts=True)
             hx[i,bin_idxs] = counts
             ale = np.multiply(ale, 1-data)
