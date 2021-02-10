@@ -5,10 +5,6 @@ import pandas as pd
 import numpy as np
 from joblib import Parallel, delayed
 from scipy.stats import norm
-import pickle
-from compute_ale import compute_ale
-from compile_studies import compile_studies
-from contribution import contribution
 from nilearn import plotting
 from scipy import ndimage
 from kernel import kernel_conv
@@ -26,36 +22,36 @@ def par_perm(s1,s2,vp,benchmark,shape,direction):
     arr[draw >= benchmark] = 1
     return arr
 
-def compute_contrast(experiment1, study1, experiment2, study2):
+def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
     
     repeats=25000
     u = 0.05
     eps=np.finfo(float).eps
 
     cwd = os.getcwd()
-    mask_folder = cwd + "/MaskenEtc/"
+    mask_folder = f"{cwd}/MaskenEtc/"
     try:
-        os.makedirs(cwd + "/ALE/Contrasts/Images")
-        os.makedirs(cwd + "/ALE/Conjunctions/Images")
+        os.makedirs(f"{cwd}/ALE/Contrasts/Images")
+        os.makedirs(f"{cwd}/ALE/Conjunctions/Images")
     except:
         pass
 
-    template = nb.load(mask_folder + "Grey10.nii")
+    template = nb.load(f"{mask_folder}Grey10.nii")
     template_data = template.get_fdata()
     template_shape = template_data.shape
     pad_tmp_shape = [value+30 for value in template_shape]
-    bg_img = nb.load(mask_folder + "MNI152.nii")
+    bg_img = nb.load(f"{mask_folder}MNI152.nii")
     
-    s1 = list(range(experiment1.shape[0]))
-    s2 = list(range(experiment2.shape[0]))
+    s1 = list(range(exp_df1.shape[0]))
+    s2 = list(range(exp_df2.shape[0]))
 
 
-    if isfile("{}/ALE/Contrasts/{}--{}_P95.nii".format(cwd, study1, study2)):
+    if isfile(f"{cwd}/ALE/Contrasts/{study1}--{study2}_P95.nii"):
         print("Loading contrast.")
-        contrast_arr = nb.load("{}/ALE/Contrasts/{}--{}_P95.nii".format(cwd,study1,study2)).get_fdata()
+        contrast_arr = nb.load(f"{cwd}/ALE/Contrasts/{study1}--{study2}_P95.nii").get_fdata()
     else:
         print("Computing positive contrast.")
-        fx1 = nb.load("{}/ALE/Results/{}_cFWE05.nii".format(cwd,study1)).get_fdata()
+        fx1 = nb.load(f"{cwd}/ALE/Results/{study1}_cFWE05.nii").get_fdata()
         ind = np.where(fx1 > 0)
         if ind[0].size > 0:
             z1 = fx1[fx1 > 0]
@@ -73,7 +69,8 @@ def compute_contrast(experiment1, study1, experiment2, study2):
             benchmark = (1-np.prod(vp[:len(s1),:], axis=0)) - (1-np.prod(vp[len(s1):,:], axis=0))
 
             print("Randomising (positive).")
-            result = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm)(s1, s2, vp, benchmark, ind[0].shape, direction="positive") for i in range(repeats))
+            result = Parallel(n_jobs=-1,backend="threading")
+                             (delayed(par_perm)(s1, s2, vp, benchmark, ind[0].shape, direction="positive") for i in range(repeats))
             a = np.sum(result, axis=0)
             a = norm.ppf(1-(a/repeats))
             a[np.logical_and(np.isinf(a), a>0)] = norm.ppf(1-eps)

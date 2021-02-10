@@ -32,14 +32,11 @@ def kernel_calc(affine, fwhm, dims):
                                (pad_size,pad_size)),'constant', constant_values=0)
     return gkern3d
 
-def kernel_conv(i, df, shape):
+def kernel_conv(peaks, kernel, shape):
     data = np.zeros(shape)
-    for ii in range(df.at[i, 'Peaks']):
-                coords = df.XYZ[i].T[:,:3][ii]
-                x_range = (coords[0],coords[0]+31)
-                y_range = (coords[1],coords[1]+31)
-                z_range = (coords[2],coords[2]+31)
-                data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]] = \
-                np.maximum(data[x_range[0]:x_range[1], y_range[0]:y_range[1], z_range[0]:z_range[1]],
-                           df.at[i, 'Kernel'])
+    for peak in peaks:
+        x = (peak[0],peak[0]+31)
+        y = (peak[1],peak[1]+31)
+        z = (peak[2],peak[2]+31)
+        data[x[0]:x[1], y[0]:y[1], z[0]:z[1]] = np.maximum(data[x[0]:x[1], y[0]:y[1], z[0]:z[1]], kernel)
     return data[15:data.shape[0]-15,15:data.shape[1]-15, 15:data.shape[2]-15]

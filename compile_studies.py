@@ -1,8 +1,9 @@
 import pandas as pd
 
-def compile_studies(df, row_index, experiments, tasks):
-    conditions = df.iloc[row_index, 4:].dropna().to_list()
+def compile_studies(exp_df, row_index, tasks):
+    conditions = exp_df.iloc[row_index, 4:].dropna().to_list()
     to_use = []
+    not_to_use = []
     for condition in conditions:
         operation = condition[0]
         tag = condition[1:].lower()
@@ -11,7 +12,7 @@ def compile_studies(df, row_index, experiments, tasks):
             to_use.append(tasks[tasks.Name == tag].ExpIndex.to_list()[0])
 
         if operation == "-":
-            not_to_use = tasks[tasks.Name == tag].ExpIndex.to_list()[0]
+            not_to_use.append(tasks[tasks.Name == tag].ExpIndex.to_list()[0])
 
         if operation == "?":
             flat_list = [number for sublist in to_use for number in sublist]
@@ -20,7 +21,6 @@ def compile_studies(df, row_index, experiments, tasks):
             
         #if operation == '#':
         # Voi Analysis needs to be added at a later point
-
     sets = map(set, to_use)
     to_use = list(set.intersection(*sets))
     return to_use
