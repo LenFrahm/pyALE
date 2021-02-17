@@ -21,6 +21,13 @@ def compile_studies(exp_df, row_index, tasks):
             
         #if operation == '#':
         # Voi Analysis needs to be added at a later point
-    sets = map(set, to_use)
-    to_use = list(set.intersection(*sets))
+    use_sets = map(set, to_use)
+    to_use = list(set.intersection(*use_sets))
+    
+    if len(not_to_use) > 0:
+        not_use_sets = map(set, not_to_use)
+        not_to_use = list(set.intersection(*not_use_sets))
+        
+        to_use = to_use.differences(not_to_use)
+        
     return to_use

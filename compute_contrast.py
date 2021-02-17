@@ -8,26 +8,81 @@ from scipy.stats import norm
 from nilearn import plotting
 from scipy import ndimage
 from kernel import kernel_conv
+from main_effect import plot_and_save
+# importing brain template information
+from template import shape, pad_shape, prior, affine
 
-def par_perm(s1,s2,vp,benchmark,shape,direction):
-    arr = np.zeros(shape)
-    sr = np.arange(len(s1)+len(s2))
-    np.random.shuffle(sr)
-    if direction == "positive":
-        draw = (1-np.prod(vp[sr[:len(s1)],:], axis=0)) - (1-np.prod(vp[sr[len(s1):],:], axis=0))
-    elif direction == "negative":
-        draw = (1-np.prod(vp[sr[len(s1):],:], axis=0)) - (1-np.prod(vp[sr[:len(s1)],:], axis=0))
-    else:
-        print("Please specify direction of contrast.")
-    arr[draw >= benchmark] = 1
-    return arr
+REPEATS = 25000 #number of permutations
+U = 0.05 # significance level by which to threshold z-values
+EPS = np.finfo(float).eps # float precision
 
-def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
+
+def compute_ale_diff(exp_df1, exp_df2, s1, s2, z1, ind):   
+    ma = np.zeros((len(s1)+len(s2), z1.size))
+    for i in s1:
+        data = kernel_conv(peaks=exp_df1.at[i, "XYZ"].T[:,:3], kernel =exp_df1.at[i,"Kernel"])
+        ma[i,:] = data[tuple(ind)]
+    for i in s2:
+        data = kernel_conv(peaks=exp_df2.at[i, "XYZ"].T[:,:3], kernel=exp_df2.at[i,"Kernel"])
+        ma[i+len(s1),:] = data[tuple(ind)]
+
+    ma = 1-ma   # MA map for each study in both experiments
+    # Actual observed difference in ALE values between the two meta analysis
+    ale_diff = (1-np.prod(ma[:len(s1),:], axis=0)) - (1-np.prod(ma[len(s1):,:], axis=0))
     
-    repeats=25000
-    u = 0.05
-    eps=np.finfo(float).eps
+    return ma, ale_diff
 
+
+def par_perm_diff(s1,s2,ma,ale_diff):
+    null_diff = np.zeros(ale_diff.shape)
+    # make list with range of values with amount of studies in both experiments together
+    sr = np.arange(len(s1)+len(s2))
+    # random permutation
+    np.random.shuffle(sr)
+    # calculate difference for this permutation
+    perm_diff = (1-np.prod(ma[sr[:len(s1)],:], axis=0)) - (1-np.prod(ma[sr[len(s1):],:], axis=0))
+    # set voxels where perm_diff is bigger than the actually observed diff to 1
+    null_diff[perm_diff >= ale_diff] = 1
+    
+    return null_diff
+
+
+def compute_sig_diff(z, null_diff):
+    # sum all times the permutation was bigger than the actual difference and divide it by the number of repititions -> ~0.5 if voxel shows no siginifcant difference
+    a = np.sum(null_diff, axis=0)/ REPEATS
+    a = norm.ppf(1-a) # z-value
+    a[np.logical_and(np.isinf(a), a>0)] = norm.ppf(1-EPS)
+
+    z = np.minimum(z, a) # for values where the actual difference is consistently higher than the null distribution the minimum will be z and ->
+    sig_idxs = np.argwhere(z > norm.ppf(1-U)).T # will most likely be above the threshold of p = 0.05 or z ~ 1.65
+    z = z[sig_idxs]
+    
+    return z, sig_idxs
+
+
+def compute_conjunction(fx1, fx2):
+
+    min_arr = np.minimum(fx1, fx2)
+    conj_coords = np.where(min_arr > 0)
+    cluster_arr = np.zeros(shape)
+    cluster_arr[tuple(conj_coords)] = 1
+    label_arr, cluster_count = ndimage.label(cluster_arr)
+    labels, count = np.unique(label_arr[label_arr>0], return_counts=True)
+
+    conj_arr = np.zeros(shape)
+    counter = 0
+    for i in labels:
+        if count[i-1] > 50:
+            conj_arr[label_arr == i] = min_arr[label_arr == i]
+            counter += 1
+    if counter == 0:
+        return None
+    
+    return conj_arr
+
+
+def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):    
+    # Create necessary folder structure
     cwd = os.getcwd()
     mask_folder = f"{cwd}/MaskenEtc/"
     try:
@@ -35,114 +90,65 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
         os.makedirs(f"{cwd}/ALE/Conjunctions/Images")
     except:
         pass
-
-    template = nb.load(f"{mask_folder}Grey10.nii")
-    template_data = template.get_fdata()
-    template_shape = template_data.shape
-    pad_tmp_shape = [value+30 for value in template_shape]
-    bg_img = nb.load(f"{mask_folder}MNI152.nii")
     
+    # Declare variables for future calculations
+    # simple lists containing numbers 0 to number of studies -1 for iteration over studies
     s1 = list(range(exp_df1.shape[0]))
     s2 = list(range(exp_df2.shape[0]))
 
-
-    if isfile(f"{cwd}/ALE/Contrasts/{study1}--{study2}_P95.nii"):
+    # Check if contrast has already been calculated
+    if isfile(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii"):
         print("Loading contrast.")
-        contrast_arr = nb.load(f"{cwd}/ALE/Contrasts/{study1}--{study2}_P95.nii").get_fdata()
+        contrast_arr = nb.load(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii").get_fdata()
     else:
         print("Computing positive contrast.")
-        fx1 = nb.load(f"{cwd}/ALE/Results/{study1}_cFWE05.nii").get_fdata()
+        fx1 = nb.load(f"{cwd}/ALE/Results/{exp_name1}_cFWE05.nii").get_fdata()
         ind = np.where(fx1 > 0)
         if ind[0].size > 0:
             z1 = fx1[fx1 > 0]
-            vp = np.zeros((len(s1)+len(s2), z1.size))
-
-            for i in s1:
-                data = kernel_conv(i, experiment1, pad_tmp_shape)
-                vp[i,:] = data[tuple(ind)]
-
-            for i in s2:
-                data = kernel_conv(i, experiment2, pad_tmp_shape)
-                vp[i+len(s1),:] = data[tuple(ind)]
-
-            vp = 1-vp
-            benchmark = (1-np.prod(vp[:len(s1),:], axis=0)) - (1-np.prod(vp[len(s1):,:], axis=0))
-
+            ma, ale_diff = compute_ale_diff(exp_df1, exp_df2, s1, s2, z1, ind)
             print("Randomising (positive).")
-            result = Parallel(n_jobs=-1,backend="threading")
-                             (delayed(par_perm)(s1, s2, vp, benchmark, ind[0].shape, direction="positive") for i in range(repeats))
-            a = np.sum(result, axis=0)
-            a = norm.ppf(1-(a/repeats))
-            a[np.logical_and(np.isinf(a), a>0)] = norm.ppf(1-eps)
-
-            z1 = np.minimum(z1, a)
-            ind1 = np.argwhere(z1 > norm.ppf(1-u))
-            idx_list1 = np.array([[ind[0][idx][0], ind[1][idx][0], ind[2][idx][0]] for idx in ind1]).T
-            z1 = z1[z1 > norm.ppf(1-u)]
+            # estimate null distribution of difference values if studies would be randomly assigned to either meta analysis
+            null_diff = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm_diff)(s1, s2, ma, ale_diff) for i in range(REPEATS))
+            z1, sig_idxs1 = compute_sig_diff(z1, null_diff)
+            sig_idxs1 = np.array(ind)[:,sig_idxs1].squeeze()
 
         else:
-            print("{}: No significant indices!".format(study1))
-            ind1, z1 = [], []
+            print(f"{exp_name1}: No significant indices!")
+            z1, sig_idxs1 = [], []
 
 
         print("Computing negative contrast.")
-        fx2 = nb.load("{}/ALE/Results/{}_cFWE05.nii".format(cwd,study2)).get_fdata()
+        fx2 = nb.load(f"{cwd}/ALE/Results/{exp_name2}_cFWE05.nii").get_fdata()
         ind = np.where(fx2 > 0)
         if ind[0].size > 0:
             z2 = fx2[fx2 > 0]
-            vp = np.zeros((len(s1)+len(s2), z2.size))
-
-            for i in s1:
-                data = kernel_conv(i, experiment1, pad_tmp_shape)
-                vp[i,:] = data[tuple(ind)]
-
-            for i in s2:
-                data = kernel_conv(i, experiment2, pad_tmp_shape)
-                vp[i+len(s1),:] = data[tuple(ind)]
-
-            vp = 1-vp
-            benchmark = (1-np.prod(vp[len(s1):,:], axis=0)) - (1-np.prod(vp[:len(s1),:], axis=0))
-
+            # same calculation as above, but this time the studies are flipped in parameter position
+            ma, ale_diff = compute_ale_diff(exp_df2, exp_df1, s2, s1, z2, ind)
             print("Randomising (negative).")
-            result = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm)(s1, s2, vp, benchmark, ind[0].shape, direction="negative") for i in range(repeats))
-            a = np.sum(result, axis=0)
-            a = norm.ppf(1-(a/repeats))
-            a[np.logical_and(np.isinf(a), a>0)] = norm.ppf(1-eps)
-
-            z2 = np.minimum(z2, a)
-            ind2 = np.argwhere(z2 > norm.ppf(1-u))
-            idx_list2 = np.array([[ind[0][idx][0], ind[1][idx][0], ind[2][idx][0]] for idx in ind2]).T
-            z2 = z2[z2 > norm.ppf(1-u)]
+            null_diff = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm_diff)(s2, s1, ma, ale_diff) for i in range(REPEATS))
+            z2, sig_idxs2 = compute_sig_diff(z2, null_diff)
+            sig_idxs2 = np.array(ind)[:,sig_idxs2].squeeze()
+            
 
         else:
-            print("{}: No significant indices!".format(study2))
-            ind2, z2 = [], []
+            print(f"{exp_name}: No significant indices!")
+            z2, sig_idxs2 = [], []
 
         print("Inference and printing.")
-        contrast_arr = np.zeros(template_shape)
-        contrast_arr[tuple(idx_list1)] = z1
-        contrast_arr[tuple(idx_list2)] = -z2
-        contrast_img = nb.Nifti1Image(contrast_arr, template.affine)
-        plotting.plot_stat_map(contrast_img, bg_img=bg_img, output_file="{}/ALE/Contrasts/Images/{}--{}_P95.png".format(cwd,study1,study2))
-        nb.save(contrast_img, "{}/ALE/Contrasts/{}--{}_P95.nii".format(cwd,study1,study2))
-
-    if isfile("{}/ALE/Conjunctions/{}_AND_{}_P95.nii".format(cwd,study1,study2)):
+        contrast_arr = np.zeros(shape)
+        contrast_arr[tuple(sig_idxs1)] = z1
+        contrast_arr[tuple(sig_idxs2)] = -z2
+        contrast_arr = plot_and_save(contrast_arr, img_folder=f"{cwd}/ALE/Contrasts/Images/{exp_name1}--{exp_name2}_P95.png",
+                                                   nii_folder=f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii")
+    
+    #Check if conjunction has already been calculated
+    if isfile(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii"):
         print("Loading conjunction.")
-        conj_arr = nb.load("{}/ALE/Conjunctions/{}_AND_{}_P95.nii".format(cwd,study1,study2)).get_fdata()
+        conj_arr = nb.load(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii").get_fdata()
     else:
         print("Computing conjunction.")
-        min_arr = np.minimum(fx1, fx2)
-        conj_coords = np.where(min_arr > 0)
-        cluster_arr = np.zeros(template_shape)
-        cluster_arr[tuple(conj_coords)] = 1
-        label_arr, cluster_count = ndimage.label(cluster_arr)
-        labels, count = np.unique(label_arr[label_arr>0], return_counts=True)
-
-        conj_arr = np.zeros(template_shape)
-        for i in labels:
-            if count[i-1] > 50:
-                conj_arr[label_arr == i] = min_arr[label_arr == i]
-
-        conj_img = nb.Nifti1Image(conj_arr, template.affine)
-        plotting.plot_stat_map(contrast_img, bg_img=bg_img, output_file="{}/ALE/Conjunctions/Images/{}_AND_{}_P95.png".format(cwd,study1,study2))
-        nb.save(conj_img, "{}/ALE/Conjunctions/{}_AND_{}_P95.nii".format(cwd,study1,study2))
+        conj_arr = compute_conjunction(fx1, fx2) 
+        if conj_arr is not None:
+            conj_arr = plot_and_save(conj_arr, img_folder=f"{cwd}/ALE/Conjunctions/Images/{exp_name1}_AND_{exp_name2}_P95.png",
+                                               nii_folder=f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii")

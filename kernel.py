@@ -3,6 +3,8 @@ from recordclass import recordclass
 from math import sqrt, log, ceil, pi
 import pandas as pd
 import numpy as np
+# importing brain template shape
+from template import pad_shape
 
 def kernel_calc(affine, fwhm, dims):
     #Conversion from fwhm to sigma based on affine
@@ -32,8 +34,8 @@ def kernel_calc(affine, fwhm, dims):
                                (pad_size,pad_size)),'constant', constant_values=0)
     return gkern3d
 
-def kernel_conv(peaks, kernel, shape):
-    data = np.zeros(shape)
+def kernel_conv(peaks, kernel):
+    data = np.zeros(pad_shape)
     for peak in peaks:
         x = (peak[0],peak[0]+31)
         y = (peak[1],peak[1]+31)

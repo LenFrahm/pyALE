@@ -4,78 +4,92 @@ import numpy as np
 import nibabel as nb
 from scipy import ndimage
 from kernel import kernel_conv
+# importing brain template information
+from template import shape, pad_shape, prior, affine
 
-def contribution(s_index, experiments, tasks, study):
+
+def contribution(exp_df, exp_name, exp_idxs, tasks):
     
+    # Create necessary folder structure
     cwd = os.getcwd()
-    mask_folder = cwd + "/MaskenEtc/"
+    mask_folder = f"{cwd}/MaskenEtc/"
     try:
-        os.mkdir(cwd + "/ALE/Contribution/")
+        os.mkdir(f"{cwd}/ALE/Contribution/")
     except FileExistsError:
         pass
     
-    s0 = list(range(len(s_index)))
+    s0 = list(range(exp_df.shape[0]))
     
-    template = nb.load(mask_folder + "Grey10.nii")
-    template_data = template.get_fdata()
-    template_shape = template_data.shape
-    pad_tmp_shape = [value+30 for value in template_shape]
-
-    exp_data = np.empty((len(s0), template_shape[0], template_shape[1], template_shape[2]))
+    # Compute MA maps per study
+    exp_data = np.empty((len(s0), shape[0], shape[1], shape[2]))
     for i in s0:
-        exp_data[i,:,:,:] = kernel_conv(i, experiments, pad_tmp_shape)
-
+        exp_data[i,:,:,:] = kernel_conv(peaks = exp_df.at[i, "XYZ"].T[:,:3],
+                                        kernel = exp_df.at[i, "Kernel"])
+    
     for corr_method in ["TFCE", "FWE", "cFWE"]:
-        txt = open(cwd + "/ALE/Contribution/" + study + "_" + corr_method + ".txt", "w+")
-        txt.write("\nStarting with {}! \n".format(study))
-        txt.write("\n{}: {} experiments; {} unique subjects (average of {:4.1f} per experiment) \n".format(study, len(s0), experiments.Subjects.sum(), experiments.Subjects.mean()))
-
-        if isfile(cwd + "/ALE/Results/{}_{}05.nii".format(study, corr_method)):
-            results = nb.load(cwd + "/ALE/Results/{}_{}05.nii".format(study, corr_method)).get_fdata()
-            if results.any() > 0:
+        txt = open(f"{cwd}/ALE/Contribution/{exp_name}_{corr_method}.txt", "w+")
+        txt.write(f"\nStarting with {exp_name}! \n")
+        txt.write(f"\n{exp_name}: {len(s0)} experiments; {exp_df.Subjects.sum()} unique subjects (average of {exp_df.Subjects.mean():.1f} per experiment) \n")
+        
+        if isfile(f"{cwd}/ALE/Results/{exp_name}_{corr_method}05.nii"):
+            # load in results that are corrected by the specific method
+            results = nb.load(f"{cwd}/ALE/Results/{exp_name}_{corr_method}05.nii").get_fdata()
+            results = np.nan_to_num(results)
+            if results.any() > 0:    
+                ale = nb.load(f"{cwd}/ALE/Volumes/{exp_name}.nii")
+                # cluster the significant voxels
                 labels, cluster_count = ndimage.label(results)
-                ale = nb.load(cwd + "/ALE/Volumes/{}.nii".format(study))
-                for label in np.unique(labels[labels > 0]):
+                label, count = np.unique(labels, return_counts=True)
+
+                for index, label in enumerate(np.argsort(count)[::-1][1:]):
                     clust_ind = np.vstack(np.where(labels == label))
                     clust_size = clust_ind.shape[1]
-                    center = np.median(np.dot(template.affine, np.pad(clust_ind, ((0,1),(0,0)), constant_values=1)), axis=1)
+                    # find the center voxel of the cluster
+                    # to take the dot product with the affine matrix a row of 1s needs to be added the cluster indices (np.pad)
+                    center = np.median(np.dot(affine, np.pad(clust_ind, ((0,1),(0,0)), constant_values=1)), axis=1)
                     if clust_ind[0].size > 5:
-                        txt.write("\n\nCluster {}: {} voxel [Center: {}/{}/{}] \n".format(label, clust_size, int(center[0]), int(center[1]), int(center[2])))
-
+                        txt.write(f"\n\nCluster {index+1}: {clust_size} voxel [Center: {int(center[0])}/{int(center[1])}/{int(center[2])}] \n")
+                        
+                        # calculate the relative contribution of each study to the cluster voxels total ALE
                         ax = exp_data[:, clust_ind[0], clust_ind[1], clust_ind[2]]
-                        axf = 1-np.prod(1-ax, axis=0)
-                        axr = np.array([1-np.prod(1-np.delete(ax, i, axis=0), axis=0) for i in s0])
-                        wig = np.array([np.sum(exp_data[i][tuple(clust_ind)]) for i in s0])
+                        axf = 1-np.prod(1-ax, axis=0) # ale values
+                        axr = np.array([1-np.prod(1-np.delete(ax, i, axis=0), axis=0) for i in s0]) # ale values if one study would be omitted
+                        wig = np.array([np.sum(exp_data[i][tuple(clust_ind)]) for i in s0]) # summing MA over the cluster per study
+                        # summarizing array for each study: 1. total MA in cluster 2. average MA per voxel in cluster
+                        # 3. relative contribution to cluster ale 4. maximum ale contribution in the cluster (single voxel)
                         xsum = np.array([[wig[i], 100*wig[i]/clust_size, 100*(1-np.mean(np.divide(axr[i,:], axf))), np.max(100*(1-np.divide(axr[i,:], axf)))] for i in s0])
+                        # convert relative contribtuion to percentages that add to 100
                         xsum[:,2] = xsum[:,2]/np.sum(xsum[:,2])*100
 
                         for i in s0:
                             if xsum[i, 2]>.1 or xsum[i, 3]>5:
-                                stx = list(" " * (experiments.Author.str.len().max() + 2))
-                                stx[0:len(experiments.Author[i])] = experiments.Author[i]
+                                stx = list(" " * (exp_df.Author.str.len().max() + 2))
+                                stx[0:len(exp_df.Author[i])] = exp_df.Author[i]
                                 stx = "".join(stx)
-                                txt.write("{}\t{:.3f}\t{:.3f}\t{:.2f}\t{:.2f}\t({})\n".format(stx,xsum[i,0],xsum[i,1],xsum[i,2],xsum[i,3],experiments.at[i, "Subjects"],))
+                                n_subjects = exp_df.at[i, "Subjects"]
+                                txt.write(f"{stx}\t{xsum[i,0]:.3f}\t{xsum[i,1]:.3f}\t{xsum[i,2]:.2f}\t{xsum[i,3]:.2f}\t({n_subjects})\n")
 
                         txt.write("\n\n")
-
+                        
+                        # calculate task contribution to cluster
                         for i in range(tasks.shape[0]):
                             stx = list(" " * (tasks.Name.str.len().max()))
                             stx[0:len(tasks.Name[i])] = tasks.Name[i]
                             stx = "".join(stx)
-                            mask = [s in tasks.ExpIndex[i] for s in s_index]
+                            mask = [s in tasks.ExpIndex[i] for s in exp_idxs]
                             if mask.count(True) > 1:
                                 xsum_tmp = np.sum(xsum[mask], axis=0)
-                                txt.write("{}\t{:.3f}\t{:.3f}\t{:.2f}\t \n".format(stx,xsum_tmp[0],xsum_tmp[1], xsum_tmp[2]))
+                                txt.write(f"{stx}\t{xsum_tmp[0]:.3f}\t{xsum_tmp[1]:.3f}\t{xsum_tmp[2]:.2f}\t \n")
                             elif mask.count(True) == 1:
-                                txt.write("{}\t{:.3f}\t{:.3f}\t{:.2f}\t \n".format(stx,xsum[mask][0,0],xsum[mask][0,1], xsum[mask][0,2]))
+                                txt.write(f"{stx}\t{xsum_tmp[0]:.3f}\t{xsum_tmp[1]:.3f}\t{xsum_tmp[2]:.2f}\t \n")
                             else:
                                 pass
 
-                txt.write("\nDone with {}!".format(corr_method))
+                txt.write(f"\nDone with {corr_method}!")
                 txt.close()
             else:
-                txt.write("No significant clusters in {}!".format(corr_method))
+                txt.write(f"No significant clusters in {corr_method}!")
                 txt.close()
         else:
-            txt.write("Could not find {} results for {}!".format(corr_method, study))
+            txt.write(f"Could not find {corr_method} results for {exp_name}!")
             txt.close()
