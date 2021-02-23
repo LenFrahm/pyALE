@@ -4,7 +4,7 @@ Starting with Other!
 Other: 19 experiments; 423 unique subjects (average of 22.3 per experiment) 
 
 
-Cluster 0: 274 voxel [Center: -42/-38/44] 
+Cluster 1: 274 voxel [Center: -42/-38/44] 
 Liu et al., 2004          	0.182	0.066	4.71	54.84	(11)
 Roelofs et al., 2006      	0.218	0.079	5.45	55.76	(12)
 Aarts et al., 2008        	0.543	0.198	12.94	42.71	(12)
@@ -40,7 +40,7 @@ numerical variant               	1.122	0.409	26.19
 eeg-fmri                        	1.122	0.409	26.19	 
 
 
-Cluster 1: 155 voxel [Center: 10/18/40] 
+Cluster 2: 155 voxel [Center: 10/18/40] 
 Critchley et al., 2005    	0.438	0.283	19.13	51.51	(15)
 Aarts et al., 2008        	0.136	0.088	5.99	40.94	(12)
 Kim et al., 2012          	0.218	0.140	10.22	53.38	(16)
@@ -74,34 +74,34 @@ numerical variant               	0.353	0.228	16.21
 eeg-fmri                        	0.353	0.228	16.21	 
 
 
-Cluster 2: 16 voxel [Center: -56/5/34] 
-Kim et al., 2012          	0.002	0.015	0.87	3.69	(16)
-Melcher and Gruber, 2006  	0.065	0.403	22.72	35.94	(12)
-Huang et al., 2012 A      	0.002	0.012	0.68	3.03	(30)
-Jiang et al., 2014        	0.012	0.077	4.42	15.46	(21)
-Araneda et al. 2018       	0.082	0.514	28.84	43.66	(16)
-Krönke et al., 2018       	0.120	0.751	42.48	57.91	(139)
+Cluster 3: 18 voxel [Center: -56/5/34] 
+Kim et al., 2012          	0.003	0.015	0.88	3.69	(16)
+Melcher and Gruber, 2006  	0.073	0.406	23.17	35.94	(12)
+Huang et al., 2012 A      	0.002	0.011	0.63	3.03	(30)
+Jiang et al., 2014        	0.013	0.073	4.24	15.46	(21)
+Araneda et al. 2018       	0.091	0.504	28.57	43.66	(16)
+Krönke et al., 2018       	0.134	0.744	42.51	57.91	(139)
 
 
-all                             	0.284	1.772	100.00	 
-visual                          	0.201	1.258	71.16	 
-unmasked                        	0.284	1.772	100.00	 
-fmri                            	0.284	1.772	100.00	 
-manual response                 	0.284	1.772	100.00	 
-i>c                             	0.284	1.772	100.00	 
-other                           	0.284	1.772	100.00	 
-counting                        	0.120	0.751	42.48	 
-numerical                       	0.002	0.012	0.68	 
-spatial                         	0.082	0.514	28.84	 
+all                             	0.316	1.753	100.00	 
+visual                          	0.225	1.249	71.43	 
+unmasked                        	0.316	1.753	100.00	 
+fmri                            	0.316	1.753	100.00	 
+manual response                 	0.316	1.753	100.00	 
+i>c                             	0.316	1.753	100.00	 
+other                           	0.316	1.753	100.00	 
+counting                        	0.134	0.744	42.51	 
+numerical                       	0.002	0.011	0.63	 
+spatial                         	0.091	0.504	28.57	 
 masked                          	0.000	0.000	0.00	 
 auditory                        	0.000	0.000	0.00	 
 gender                          	0.000	0.000	0.00	 
 counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.002	0.015	0.87	 
-visual, acoustic                	0.002	0.015	0.87	 
-sizeword                        	0.002	0.015	0.87	 
-semantic-phonetic stroop        	0.002	0.015	0.87	 
-numerical variant               	0.002	0.015	0.87	 
-eeg-fmri                        	0.002	0.015	0.87	 
+spatial variant                 	0.003	0.015	0.88	 
+visual, acoustic                	0.003	0.015	0.88	 
+sizeword                        	0.003	0.015	0.88	 
+semantic-phonetic stroop        	0.003	0.015	0.88	 
+numerical variant               	0.003	0.015	0.88	 
+eeg-fmri                        	0.003	0.015	0.88	 
 
 Done with TFCE!

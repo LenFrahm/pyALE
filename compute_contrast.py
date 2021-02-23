@@ -8,7 +8,7 @@ from scipy.stats import norm
 from nilearn import plotting
 from scipy import ndimage
 from kernel import kernel_conv
-from main_effect import plot_and_save
+from main_effect import plot_and_save, compute_ma
 # importing brain template information
 from template import shape, pad_shape, prior, affine
 
@@ -17,31 +17,29 @@ U = 0.05 # significance level by which to threshold z-values
 EPS = np.finfo(float).eps # float precision
 
 
-def compute_ale_diff(exp_df1, exp_df2, s1, s2, z1, ind):   
-    ma = np.zeros((len(s1)+len(s2), z1.size))
-    for i in s1:
-        data = kernel_conv(peaks=exp_df1.at[i, "XYZ"].T[:,:3], kernel =exp_df1.at[i,"Kernel"])
-        ma[i,:] = data[tuple(ind)]
-    for i in s2:
-        data = kernel_conv(peaks=exp_df2.at[i, "XYZ"].T[:,:3], kernel=exp_df2.at[i,"Kernel"])
-        ma[i+len(s1),:] = data[tuple(ind)]
+def compute_ale_diff(exp_df1, exp_df2, s1, s2, ind):   
+    peaks1 = np.array([exp_df1.XYZ[i].T[:,:3] for i in s1], dtype=object)
+    peaks2 = np.array([exp_df2.XYZ[i].T[:,:3] for i in s2], dtype=object)
+
+    ma1 = compute_ma(s1, peaks1, exp_df1.Kernels)[:,ind[0],ind[1],ind[2]]
+    ma2 = compute_ma(s2, peaks2, exp_df2.Kernels)[:,ind[0],ind[1],ind[2]]
+    ma = np.vstack((ma1,ma2))
 
     ma = 1-ma   # MA map for each study in both experiments
     # Actual observed difference in ALE values between the two meta analysis
-    ale_diff = (1-np.prod(ma[:len(s1),:], axis=0)) - (1-np.prod(ma[len(s1):,:], axis=0))
+    ale_diff = (1-np.prod(ma[:len(s1)], axis=0)) - (1-np.prod(ma[len(s1):], axis=0))
     
     return ma, ale_diff
 
 
 def par_perm_diff(s1,s2,ma,ale_diff):
-    null_diff = np.zeros(ale_diff.shape)
     # make list with range of values with amount of studies in both experiments together
     sr = np.arange(len(s1)+len(s2))
-    # random permutation
     np.random.shuffle(sr)
-    # calculate difference for this permutation
-    perm_diff = (1-np.prod(ma[sr[:len(s1)],:], axis=0)) - (1-np.prod(ma[sr[len(s1):],:], axis=0))
+    # calculate ale difference for this permutation
+    perm_diff = (1-np.prod(ma[sr[:len(s1)]], axis=0)) - (1-np.prod(ma[sr[len(s1):]], axis=0))
     # set voxels where perm_diff is bigger than the actually observed diff to 1
+    null_diff = np.zeros(ale_diff.shape)
     null_diff[perm_diff >= ale_diff] = 1
     
     return null_diff
@@ -95,19 +93,21 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
     # simple lists containing numbers 0 to number of studies -1 for iteration over studies
     s1 = list(range(exp_df1.shape[0]))
     s2 = list(range(exp_df2.shape[0]))
+    
+    fx1 = nb.load(f"{cwd}/ALE/Results/{exp_name1}_cFWE05.nii").get_fdata()
+    fx2 = nb.load(f"{cwd}/ALE/Results/{exp_name2}_cFWE05.nii").get_fdata()
 
     # Check if contrast has already been calculated
     if isfile(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii"):
-        print("Loading contrast.")
+        print(f"{exp_name1} x {exp_name2} - Loading contrast.")
         contrast_arr = nb.load(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii").get_fdata()
     else:
-        print("Computing positive contrast.")
+        print(f"{exp_name1} x {exp_name2} - Computing positive contrast.")
         fx1 = nb.load(f"{cwd}/ALE/Results/{exp_name1}_cFWE05.nii").get_fdata()
         ind = np.where(fx1 > 0)
         if ind[0].size > 0:
             z1 = fx1[fx1 > 0]
-            ma, ale_diff = compute_ale_diff(exp_df1, exp_df2, s1, s2, z1, ind)
-            print("Randomising (positive).")
+            ma, ale_diff = compute_ale_diff(exp_df1, exp_df2, s1, s2, ind)
             # estimate null distribution of difference values if studies would be randomly assigned to either meta analysis
             null_diff = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm_diff)(s1, s2, ma, ale_diff) for i in range(REPEATS))
             z1, sig_idxs1 = compute_sig_diff(z1, null_diff)
@@ -118,24 +118,23 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
             z1, sig_idxs1 = [], []
 
 
-        print("Computing negative contrast.")
+        print(f"{exp_name1} x {exp_name2} - Computing negative contrast.")
         fx2 = nb.load(f"{cwd}/ALE/Results/{exp_name2}_cFWE05.nii").get_fdata()
         ind = np.where(fx2 > 0)
         if ind[0].size > 0:
             z2 = fx2[fx2 > 0]
             # same calculation as above, but this time the studies are flipped in parameter position
-            ma, ale_diff = compute_ale_diff(exp_df2, exp_df1, s2, s1, z2, ind)
-            print("Randomising (negative).")
+            ma, ale_diff = compute_ale_diff(exp_df2, exp_df1, s2, s1, ind)
             null_diff = Parallel(n_jobs=-1,backend="threading")(delayed(par_perm_diff)(s2, s1, ma, ale_diff) for i in range(REPEATS))
             z2, sig_idxs2 = compute_sig_diff(z2, null_diff)
             sig_idxs2 = np.array(ind)[:,sig_idxs2].squeeze()
             
 
         else:
-            print(f"{exp_name}: No significant indices!")
+            print(f"{exp_name2}: No significant indices!")
             z2, sig_idxs2 = [], []
 
-        print("Inference and printing.")
+        print(f"{exp_name1} x {exp_name2} - Inference and printing.")
         contrast_arr = np.zeros(shape)
         contrast_arr[tuple(sig_idxs1)] = z1
         contrast_arr[tuple(sig_idxs2)] = -z2
@@ -144,10 +143,10 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
     
     #Check if conjunction has already been calculated
     if isfile(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii"):
-        print("Loading conjunction.")
+        print(f"{exp_name1} & {exp_name2} - Loading conjunction.")
         conj_arr = nb.load(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii").get_fdata()
     else:
-        print("Computing conjunction.")
+        print(f"{exp_name1} & {exp_name2} - Computing conjunction.")
         conj_arr = compute_conjunction(fx1, fx2) 
         if conj_arr is not None:
             conj_arr = plot_and_save(conj_arr, img_folder=f"{cwd}/ALE/Conjunctions/Images/{exp_name1}_AND_{exp_name2}_P95.png",

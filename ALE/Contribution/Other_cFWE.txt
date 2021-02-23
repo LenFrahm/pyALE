@@ -4,7 +4,7 @@ Starting with Other!
 Other: 19 experiments; 423 unique subjects (average of 22.3 per experiment) 
 
 
-Cluster 0: 228 voxel [Center: -42/-38/44] 
+Cluster 1: 228 voxel [Center: -42/-38/44] 
 Liu et al., 2004          	0.141	0.062	4.09	45.42	(11)
 Roelofs et al., 2006      	0.182	0.080	5.21	55.76	(12)
 Aarts et al., 2008        	0.475	0.208	12.94	42.71	(12)
@@ -40,7 +40,7 @@ numerical variant               	1.003	0.440	26.97
 eeg-fmri                        	1.003	0.440	26.97	 
 
 
-Cluster 1: 207 voxel [Center: 10/18/40] 
+Cluster 2: 207 voxel [Center: 10/18/40] 
 Critchley et al., 2005    	0.539	0.260	18.27	51.51	(15)
 Aarts et al., 2008        	0.199	0.096	6.96	52.82	(12)
 Kim et al., 2012          	0.334	0.161	12.20	65.23	(16)
@@ -74,7 +74,7 @@ numerical variant               	0.532	0.257	19.16
 eeg-fmri                        	0.532	0.257	19.16	 
 
 
-Cluster 2: 111 voxel [Center: -52/4/34] 
+Cluster 3: 111 voxel [Center: -52/4/34] 
 Kim et al., 2012          	0.175	0.157	12.02	63.50	(16)
 Melcher and Gruber, 2006  	0.329	0.297	20.69	57.77	(12)
 Huang et al., 2012 A      	0.076	0.068	5.23	65.35	(30)
@@ -103,100 +103,5 @@ sizeword                        	0.175	0.157	12.02
 semantic-phonetic stroop        	0.175	0.157	12.02	 
 numerical variant               	0.175	0.157	12.02	 
 eeg-fmri                        	0.175	0.157	12.02	 
-
-
-Cluster 3: 81 voxel [Center: 12/-12/6] 
-Aarts et al., 2008        	0.042	0.052	3.87	22.52	(12)
-Hart et al., 2010         	0.165	0.204	15.03	59.51	(14)
-Kim et al., 2012          	0.229	0.283	20.79	56.02	(16)
-Melcher and Gruber, 2006  	0.002	0.003	0.21	1.90	(12)
-Ansari et al., 2006       	0.089	0.110	8.14	51.19	(14)
-Krönke et al., 2018       	0.370	0.457	33.11	74.95	(139)
-Robertson et al., 2015    	0.211	0.260	18.86	58.70	(16)
-
-
-all                             	1.108	1.368	100.00	 
-visual                          	1.108	1.368	100.00	 
-unmasked                        	0.943	1.165	84.97	 
-fmri                            	1.108	1.368	100.00	 
-manual response                 	0.901	1.113	81.10	 
-i>c                             	1.108	1.368	100.00	 
-other                           	1.108	1.368	100.00	 
-counting                        	0.370	0.457	33.11	 
-numerical                       	0.211	0.260	18.86	 
-spatial                         	0.000	0.000	0.00	 
-masked                          	0.165	0.204	15.03	 
-auditory                        	0.165	0.204	15.03	 
-gender                          	0.165	0.204	15.03	 
-counting variant                	0.165	0.204	15.03	 
-spatial variant                 	0.271	0.335	24.65	 
-visual, acoustic                	0.271	0.335	24.65	 
-sizeword                        	0.271	0.335	24.65	 
-semantic-phonetic stroop        	0.271	0.335	24.65	 
-numerical variant               	0.271	0.335	24.65	 
-eeg-fmri                        	0.271	0.335	24.65	 
-
-
-Cluster 4: 70 voxel [Center: -8/4/60] 
-Liu et al., 2004          	0.001	0.002	0.15	1.23	(11)
-Roelofs et al., 2006      	0.019	0.027	1.95	14.72	(12)
-Aarts et al., 2008        	0.286	0.408	28.03	46.08	(12)
-Matthews et al., 2004     	0.068	0.098	7.17	52.07	(18)
-Zoccatelli et al., 2010   	0.084	0.120	8.47	42.85	(10)
-Jiang et al., 2014        	0.266	0.380	26.70	59.57	(21)
-Krönke et al., 2018       	0.279	0.399	27.16	70.62	(139)
-Robertson et al., 2015    	0.004	0.005	0.36	4.51	(16)
-
-
-all                             	1.007	1.439	100.00	 
-visual                          	1.007	1.439	100.00	 
-unmasked                        	1.007	1.439	100.00	 
-fmri                            	1.007	1.439	100.00	 
-manual response                 	0.701	1.001	69.87	 
-i>c                             	1.007	1.439	100.00	 
-other                           	1.007	1.439	100.00	 
-counting                        	0.347	0.496	34.33	 
-numerical                       	0.004	0.005	0.37	 
-spatial                         	0.105	0.150	10.57	 
-masked                          	0.000	0.000	0.00	 
-auditory                        	0.000	0.000	0.00	 
-gender                          	0.000	0.000	0.00	 
-counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.286	0.408	28.03	 
-visual, acoustic                	0.286	0.408	28.03	 
-sizeword                        	0.286	0.408	28.03	 
-semantic-phonetic stroop        	0.286	0.408	28.03	 
-numerical variant               	0.286	0.408	28.03	 
-eeg-fmri                        	0.286	0.408	28.03	 
-
-
-Cluster 5: 66 voxel [Center: -26/-68/36] 
-Aarts et al., 2008        	0.205	0.311	20.95	49.86	(12)
-Zoccatelli et al., 2010   	0.005	0.008	0.57	5.13	(10)
-Huang et al., 2012 A      	0.188	0.285	19.55	65.83	(30)
-Kaufmann et al., 2005     	0.279	0.423	28.53	50.85	(14)
-Krönke et al., 2018       	0.294	0.446	30.37	72.09	(139)
-
-
-all                             	0.972	1.473	100.00	 
-visual                          	0.972	1.473	100.00	 
-unmasked                        	0.972	1.473	100.00	 
-fmri                            	0.972	1.473	100.00	 
-manual response                 	0.767	1.162	79.05	 
-i>c                             	0.972	1.473	100.00	 
-other                           	0.972	1.473	100.00	 
-counting                        	0.294	0.446	30.37	 
-numerical                       	0.467	0.708	48.08	 
-spatial                         	0.005	0.008	0.57	 
-masked                          	0.000	0.000	0.00	 
-auditory                        	0.000	0.000	0.00	 
-gender                          	0.000	0.000	0.00	 
-counting variant                	0.000	0.000	0.00	 
-spatial variant                 	0.206	0.311	20.98	 
-visual, acoustic                	0.206	0.311	20.98	 
-sizeword                        	0.206	0.311	20.98	 
-semantic-phonetic stroop        	0.206	0.311	20.98	 
-numerical variant               	0.206	0.311	20.98	 
-eeg-fmri                        	0.206	0.311	20.98	 
 
 Done with cFWE!

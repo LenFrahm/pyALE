@@ -24,7 +24,7 @@ def contribution(exp_df, exp_name, exp_idxs, tasks):
     exp_data = np.empty((len(s0), shape[0], shape[1], shape[2]))
     for i in s0:
         exp_data[i,:,:,:] = kernel_conv(peaks = exp_df.at[i, "XYZ"].T[:,:3],
-                                        kernel = exp_df.at[i, "Kernel"])
+                                        kernel = exp_df.at[i, "Kernels"])
     
     for corr_method in ["TFCE", "FWE", "cFWE"]:
         txt = open(f"{cwd}/ALE/Contribution/{exp_name}_{corr_method}.txt", "w+")
