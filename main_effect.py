@@ -13,7 +13,7 @@ from scipy import ndimage
 from joblib import Parallel, delayed
 from kernel import kernel_conv
 # importing brain template information
-from template import shape, pad_shape, prior, affine
+from template import shape, pad_shape, prior, affine, sample_space
 
 
 EPS =  np.finfo(float).eps
@@ -133,11 +133,11 @@ def compute_tfce(z, sample_space):
     return tfce
 
 
-def compute_cluster(z, thresh=THRESH, sample_space=None, cut_cluster=None):    
+def compute_cluster(z, sample_space=None, cut_cluster=None):    
     # disregard all voxels that feature a z-value of lower than some threshold (approx. 3 standard deviations aways from the mean)
     # this serves as a preliminary thresholding
     sig_arr = np.zeros(shape)
-    sig_arr[z > norm.ppf(1-thresh)] = 1
+    sig_arr[z > norm.ppf(1-THRESH)] = 1
     # find clusters of significant z-values
     labels, cluster_count = ndimage.label(sig_arr)
     # save number of voxels in biggest cluster
@@ -153,7 +153,7 @@ def compute_cluster(z, thresh=THRESH, sample_space=None, cut_cluster=None):
     
     
 def compute_noise_max(s0, sample_space, num_peaks, kernels, target_n=None, ale_null=None, bin_edges=None,
-                      bin_centers=None, tfce=None, thresh=THRESH):
+                      bin_centers=None, tfce=None):
     if target_n:
         s0 = np.random.permutation(s0)
         s0 = s0[:target_n]
@@ -170,14 +170,14 @@ def compute_noise_max(s0, sample_space, num_peaks, kernels, target_n=None, ale_n
         ale_null = compute_ale_null(s0, hx, bin_centers)
     z = compute_z(ale, ale_null)
     # Cluster level threshold
-    max_cluster = compute_cluster(z, thresh, sample_space)
+    max_cluster = compute_cluster(z, sample_space)
     if tfce:
         tfce = compute_tfce(z, sample_space)
         # TFCE threshold
         max_tfce = np.max(tfce)
         return max_ale, max_cluster, max_tfce
         
-    return max_ale, max_cluster, thresh
+    return max_ale, max_cluster
 
    
     
@@ -188,9 +188,9 @@ def main_effect(exp_df, exp_name):
     folders_req = ['Volumes', 'NullDistributions', 'VolumesZ', 'VolumesTFCE', 'Results', 'Images', 'Foci']
     folders_req_imgs = ['Foci', 'ALE', 'TFCE', 'Z']
     try:
-        os.mkdir('ALE')
+        os.makedirs('ALE/MainEffect')
         for folder in folders_req:
-            os.mkdir(f'ALE/{folder}')
+            os.mkdir(f'ALE/MainEffect/{folder}')
             if folder == 'Images':
                 for sub_folder in folders_req_imgs:
                     os.mkdir(f'ALE/Images/{sub_folder}')
@@ -209,32 +209,30 @@ def main_effect(exp_df, exp_name):
     bin_edges = np.arange(0.00005,1-mb+0.001,0.0001)
     bin_centers = np.arange(0,1-mb+0.001,0.0001)
     
-    sample_space = np.array(np.where(prior == 1))
-    
     peaks = np.array([exp_df.XYZ[i].T[:,:3] for i in s0], dtype=object)
     
 
     """ Foci Illustration """
     
-    if isfile(f'{cwd}/ALE/Foci/{exp_name}.nii'):
+    if isfile(f'{cwd}/ALE/MainEffect/Foci/{exp_name}.nii'):
         print(f'{exp_name} - loading Foci')
-        foci_arr = nb.load(f'{cwd}/ALE/Foci/{exp_name}.nii').get_fdata()        
+        foci_arr = nb.load(f'{cwd}/ALE/MainEffect/Foci/{exp_name}.nii').get_fdata()        
     else:
         print(f'{exp_name} - illustrate Foci')
         # take all peaks of included studies and indicate them with a one in a brain array
         foci_arr = illustrate_foci(peaks)
         # save both a .nii and a .png version
-        foci_arr = plot_and_save(foci_arr, img_folder=f'{cwd}/ALE/Images/Foci/{exp_name}.png', 
-                                           nii_folder=f'{cwd}/ALE/Foci/{exp_name}.nii')
+        foci_arr = plot_and_save(foci_arr, img_folder=f'{cwd}/ALE/MainEffect/Images/Foci/{exp_name}.png', 
+                                           nii_folder=f'{cwd}/ALE/MainEffect/Foci/{exp_name}.nii')
     
     """ ALE calculation """
     
-    if isfile(f'{cwd}/ALE/NullDistributions/{exp_name}.pickle'):
+    if isfile(f'{cwd}/ALE/MainEffect/NullDistributions/{exp_name}.pickle'):
         print(f'{exp_name} - loading ALE')
         print(f'{exp_name} - loading null PDF')
-        ale = nb.load(f'{cwd}/ALE/Volumes/{exp_name}.nii').get_fdata()
+        ale = nb.load(f'{cwd}/ALE/MainEffect/Volumes/{exp_name}.nii').get_fdata()
         ale = np.nan_to_num(ale)
-        with open(f'{cwd}/ALE/NullDistributions/{exp_name}.pickle', 'rb') as f:
+        with open(f'{cwd}/ALE/MainEffect/NullDistributions/{exp_name}.pickle', 'rb') as f:
             ale_null = pickle.load(f)            
     else:
         print(f'{exp_name} - computing ALE')
@@ -242,8 +240,8 @@ def main_effect(exp_df, exp_name):
         ma = compute_ma(s0, peaks, exp_df.Kernels)
         ale = compute_ale(ma)
         # save the ALE scores in both a .nii and a .png version
-        ale = plot_and_save(ale, img_folder=f"ALE/Images/ALE/{exp_name}.png",
-                                 nii_folder=f'{cwd}/ALE/Volumes/{exp_name}.nii')
+        ale = plot_and_save(ale, img_folder=f"ALE/MainEffect/Images/ALE/{exp_name}.png",
+                                 nii_folder=f'{cwd}/ALE/MainEffect/Volumes/{exp_name}.nii')
         
         print(f'{exp_name} - permutation-null PDF')
         # Use the histograms from above to estimate a null probability density function
@@ -251,34 +249,34 @@ def main_effect(exp_df, exp_name):
         ale_null = compute_ale_null(s0, hx, bin_centers)
 
         # Save the ale histogram and the null pdf to pickle
-        with open(f'{cwd}/ALE/NullDistributions/{exp_name}.pickle', "wb") as f:
+        with open(f'{cwd}/ALE/MainEffect/NullDistributions/{exp_name}.pickle', "wb") as f:
             pickle.dump(ale_null, f)
     
     """ TFCE calculation """
     
-    if isfile(f'{cwd}/ALE/VolumesTFCE/{exp_name}.nii'):
+    if isfile(f'{cwd}/ALE/MainEffect/VolumesTFCE/{exp_name}.nii'):
         print(f'{exp_name} - loading p-values & TFCE')
 
-        z = nb.load(f'{cwd}/ALE/VolumesZ/{exp_name}.nii').get_fdata()
+        z = nb.load(f'{cwd}/ALE/MainEffect/VolumesZ/{exp_name}.nii').get_fdata()
         z = np.nan_to_num(z)
 
-        tfce = nb.load(f'{cwd}/ALE/VolumesTFCE/{exp_name}.nii').get_fdata()
+        tfce = nb.load(f'{cwd}/ALE/MainEffect/VolumesTFCE/{exp_name}.nii').get_fdata()
         tfce= np.nan_to_num(tfce)        
     else:
         print(f'{exp_name} - computing p-values & TFCE')
         z = compute_z(ale, ale_null)
         tfce = compute_tfce(z, sample_space)
         
-        z = plot_and_save(z, img_folder=f"ALE/Images/Z/{exp_name}.png",
-                             nii_folder=f"ALE/VolumesZ/{exp_name}.nii") 
-        tfce = plot_and_save(tfce, img_folder=f"ALE/Images/TFCE/{exp_name}.png",
-                                   nii_folder=f"ALE/VolumesTFCE/{exp_name}.nii")
+        z = plot_and_save(z, img_folder=f"ALE/MainEffect/Images/Z/{exp_name}.png",
+                             nii_folder=f"ALE/MainEffect/VolumesZ/{exp_name}.nii") 
+        tfce = plot_and_save(tfce, img_folder=f"ALE/MainEffect/Images/TFCE/{exp_name}.png",
+                                   nii_folder=f"ALE/MainEffect/VolumesTFCE/{exp_name}.nii")
         
     """ Null distribution calculation """
     
-    if isfile(f"{cwd}/ALE/NullDistributions/{exp_name}_clustP.pickle"):
+    if isfile(f"{cwd}/ALE/MainEffect/NullDistributions/{exp_name}_clustP.pickle"):
         print(f'{exp_name} - loading noise')
-        with open(f"{cwd}/ALE/NullDistributions/{exp_name}_clustP.pickle", 'rb') as f:
+        with open(f"{cwd}/ALE/MainEffect/NullDistributions/{exp_name}_clustP.pickle", 'rb') as f:
             max_ale, max_cluster, max_tfce = pickle.load(f)            
     else:
         print(f'{exp_name} - simulating noise')       
@@ -294,32 +292,32 @@ def main_effect(exp_df, exp_name):
                                                                          tfce=1) for i in range(REPEAT)))
         # save simulation results to pickle
         simulation_pickle = (max_ale, max_cluster, max_tfce)
-        with open(f"{cwd}/ALE/NullDistributions/{exp_name}_clustP.pickle", "wb") as f:
+        with open(f"{cwd}/ALE/MainEffect/NullDistributions/{exp_name}_clustP.pickle", "wb") as f:
             pickle.dump(simulation_pickle, f)
             
     """ Multiple comparison error correction: FWE, cFWE, TFCE """
 
-    if not isfile(f"{cwd}/ALE/Results/{exp_name}_TFCE05.nii"):
+    if not isfile(f"{cwd}/ALE/MainEffect/Results/{exp_name}_TFCE05.nii"):
         print(f'{exp_name} - inference and printing')
         # voxel wise family wise error correction
         cut_max = np.percentile(max_ale, 95)
         ale = ale*(ale>cut_max)
-        ale = plot_and_save(ale, img_folder=f"ALE/Images/{exp_name}_FWE05.png",
-                                 nii_folder=f"ALE/Results/{exp_name}_FWE05.nii")
+        ale = plot_and_save(ale, img_folder=f"ALE/MainEffect/Images/{exp_name}_FWE05.png",
+                                 nii_folder=f"ALE/MainEffect/Results/{exp_name}_FWE05.nii")
         print(f"Min p-value for FWE:{sum(max_ale>np.max(ale))/len(max_ale)}")
                   
         # cluster wise family wise error correction
         cut_cluster = np.percentile(max_cluster, 95)                  
         z, max_clust = compute_cluster(z, cut_cluster=cut_cluster)
-        z = plot_and_save(z, img_folder=f"ALE/Images/{exp_name}_cFWE05.png",
-                             nii_folder=f"ALE/Results/{exp_name}_cFWE05.nii")
+        z = plot_and_save(z, img_folder=f"ALE/MainEffect/Images/{exp_name}_cFWE05.png",
+                             nii_folder=f"ALE/MainEffect/Results/{exp_name}_cFWE05.nii")
         print(f"Min p-value for cFWE:{sum(max_cluster>max_clust)/len(max_cluster)}")
 
         # tfce error correction
         cut_tfce = np.percentile(max_tfce, 95)
         tfce = tfce*(tfce>cut_tfce)
-        tfce = plot_and_save(tfce, img_folder=f"ALE/Images/{exp_name}_TFCE05.png",
-                                   nii_folder=f"ALE/Results/{exp_name}_TFCE05.nii")
+        tfce = plot_and_save(tfce, img_folder=f"ALE/MainEffect/Images/{exp_name}_TFCE05.png",
+                                   nii_folder=f"ALE/MainEffect/Results/{exp_name}_TFCE05.nii")
         print(f"Min p-value for TFCE:{sum(max_tfce>np.max(tfce))/len(max_tfce)}")
                   
     else:

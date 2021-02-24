@@ -84,8 +84,8 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
     cwd = os.getcwd()
     mask_folder = f"{cwd}/MaskenEtc/"
     try:
-        os.makedirs(f"{cwd}/ALE/Contrasts/Images")
-        os.makedirs(f"{cwd}/ALE/Conjunctions/Images")
+        os.makedirs(f"{cwd}/ALE/Unbalanced/Contrasts/Images")
+        os.makedirs(f"{cwd}/ALE/Unbalanced/Conjunctions/Images")
     except:
         pass
     
@@ -94,16 +94,15 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
     s1 = list(range(exp_df1.shape[0]))
     s2 = list(range(exp_df2.shape[0]))
     
-    fx1 = nb.load(f"{cwd}/ALE/Results/{exp_name1}_cFWE05.nii").get_fdata()
-    fx2 = nb.load(f"{cwd}/ALE/Results/{exp_name2}_cFWE05.nii").get_fdata()
+    fx1 = nb.load(f"{cwd}/ALE/MainEffect/Results/{exp_name1}_cFWE05.nii").get_fdata()
+    fx2 = nb.load(f"{cwd}/ALE/MainEffect/Results/{exp_name2}_cFWE05.nii").get_fdata()
 
     # Check if contrast has already been calculated
-    if isfile(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii"):
+    if isfile(f"{cwd}/ALE/Unbalanced/Contrasts/{exp_name1}--{exp_name2}_P95.nii"):
         print(f"{exp_name1} x {exp_name2} - Loading contrast.")
-        contrast_arr = nb.load(f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii").get_fdata()
+        contrast_arr = nb.load(f"{cwd}/ALE/Unbalanced/Contrasts/{exp_name1}--{exp_name2}_P95.nii").get_fdata()
     else:
         print(f"{exp_name1} x {exp_name2} - Computing positive contrast.")
-        fx1 = nb.load(f"{cwd}/ALE/Results/{exp_name1}_cFWE05.nii").get_fdata()
         ind = np.where(fx1 > 0)
         if ind[0].size > 0:
             z1 = fx1[fx1 > 0]
@@ -119,7 +118,6 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
 
 
         print(f"{exp_name1} x {exp_name2} - Computing negative contrast.")
-        fx2 = nb.load(f"{cwd}/ALE/Results/{exp_name2}_cFWE05.nii").get_fdata()
         ind = np.where(fx2 > 0)
         if ind[0].size > 0:
             z2 = fx2[fx2 > 0]
@@ -138,16 +136,16 @@ def compute_contrast(exp_df1, exp_name1, exp_df2, exp_name2):
         contrast_arr = np.zeros(shape)
         contrast_arr[tuple(sig_idxs1)] = z1
         contrast_arr[tuple(sig_idxs2)] = -z2
-        contrast_arr = plot_and_save(contrast_arr, img_folder=f"{cwd}/ALE/Contrasts/Images/{exp_name1}--{exp_name2}_P95.png",
-                                                   nii_folder=f"{cwd}/ALE/Contrasts/{exp_name1}--{exp_name2}_P95.nii")
+        contrast_arr = plot_and_save(contrast_arr, img_folder=f"{cwd}/ALE/Unbalanced/Contrasts/Images/{exp_name1}--{exp_name2}_P95.png",
+                                                   nii_folder=f"{cwd}/ALE/Unbalanced/Contrasts/{exp_name1}--{exp_name2}_P95.nii")
     
     #Check if conjunction has already been calculated
-    if isfile(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii"):
+    if isfile(f"{cwd}/ALE/Unbalanced/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii"):
         print(f"{exp_name1} & {exp_name2} - Loading conjunction.")
-        conj_arr = nb.load(f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii").get_fdata()
+        conj_arr = nb.load(f"{cwd}/ALE/Unbalanced/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii").get_fdata()
     else:
         print(f"{exp_name1} & {exp_name2} - Computing conjunction.")
         conj_arr = compute_conjunction(fx1, fx2) 
         if conj_arr is not None:
-            conj_arr = plot_and_save(conj_arr, img_folder=f"{cwd}/ALE/Conjunctions/Images/{exp_name1}_AND_{exp_name2}_P95.png",
-                                               nii_folder=f"{cwd}/ALE/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii")
+            conj_arr = plot_and_save(conj_arr, img_folder=f"{cwd}/ALE/Unbalanced/Conjunctions/Images/{exp_name1}_AND_{exp_name2}_P95.png",
+                                               nii_folder=f"{cwd}/ALE/Unbalanced/Conjunctions/{exp_name1}_AND_{exp_name2}_P95.nii")

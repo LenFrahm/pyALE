@@ -14,7 +14,7 @@ def contribution(exp_df, exp_name, exp_idxs, tasks):
     cwd = os.getcwd()
     mask_folder = f"{cwd}/MaskenEtc/"
     try:
-        os.mkdir(f"{cwd}/ALE/Contribution/")
+        os.mkdir(f"{cwd}/ALE/MainEffect/Contribution/")
     except FileExistsError:
         pass
     
@@ -27,13 +27,13 @@ def contribution(exp_df, exp_name, exp_idxs, tasks):
                                         kernel = exp_df.at[i, "Kernels"])
     
     for corr_method in ["TFCE", "FWE", "cFWE"]:
-        txt = open(f"{cwd}/ALE/Contribution/{exp_name}_{corr_method}.txt", "w+")
+        txt = open(f"{cwd}/ALE/MainEffect/Contribution/{exp_name}_{corr_method}.txt", "w+")
         txt.write(f"\nStarting with {exp_name}! \n")
         txt.write(f"\n{exp_name}: {len(s0)} experiments; {exp_df.Subjects.sum()} unique subjects (average of {exp_df.Subjects.mean():.1f} per experiment) \n")
         
         if isfile(f"{cwd}/ALE/Results/{exp_name}_{corr_method}05.nii"):
             # load in results that are corrected by the specific method
-            results = nb.load(f"{cwd}/ALE/Results/{exp_name}_{corr_method}05.nii").get_fdata()
+            results = nb.load(f"{cwd}/ALE/MainEffect/Results/{exp_name}_{corr_method}05.nii").get_fdata()
             results = np.nan_to_num(results)
             if results.any() > 0:    
                 ale = nb.load(f"{cwd}/ALE/Volumes/{exp_name}.nii")

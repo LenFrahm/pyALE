@@ -1,6 +1,0 @@
-
-Starting with Other! 
-
-Other: 19 experiments; 423 unique subjects (average of 22.3 per experiment) 
-
-Done with FWE!

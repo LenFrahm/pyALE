@@ -11,3 +11,4 @@ prior = np.zeros(shape, dtype=bool)
 prior[data > 0.1] = 1
 affine = template.affine
 pad_shape = [value+30 for value in shape]
+sample_space = np.array(np.where(prior == 1))
