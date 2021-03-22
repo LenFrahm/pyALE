@@ -13,8 +13,8 @@ def tal2icbm_spm(inpoints):
                         [0.0000, 0.0000,  0.0000,  1.0000]))
 
     icbm_spm = np.linalg.inv(icbm_spm)
-    inpoints = np.pad(inpoints, ((0,1),(0,0)), 'constant', constant_values=1)
-    inpoints = np.dot(icbm_spm, inpoints)
+    inpoints = np.pad(inpoints, ((0,0),(0,1)), 'constant', constant_values=1)
+    inpoints = np.dot(icbm_spm, inpoints.T)
     outpoints = np.round(inpoints[:3])
 
-    return outpoints
+    return outpoints.T

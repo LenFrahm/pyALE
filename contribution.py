@@ -10,33 +10,21 @@ from template import shape, pad_shape, prior, affine
 
 def contribution(exp_df, exp_name, exp_idxs, tasks):
     
-    # Create necessary folder structure
     cwd = os.getcwd()
-    mask_folder = f"{cwd}/MaskenEtc/"
-    try:
-        os.mkdir(f"{cwd}/ALE/MainEffect/Contribution/")
-    except FileExistsError:
-        pass
-    
     s0 = list(range(exp_df.shape[0]))
-    
-    # Compute MA maps per study
-    exp_data = np.empty((len(s0), shape[0], shape[1], shape[2]))
-    for i in s0:
-        exp_data[i,:,:,:] = kernel_conv(peaks = exp_df.at[i, "XYZ"].T[:,:3],
-                                        kernel = exp_df.at[i, "Kernels"])
+    ma = np.stack(exp_df.MA.values)
     
     for corr_method in ["TFCE", "FWE", "cFWE"]:
-        txt = open(f"{cwd}/ALE/MainEffect/Contribution/{exp_name}_{corr_method}.txt", "w+")
+        txt = open(f"{cwd}/Results/MainEffect/Full/Contribution/{exp_name}_{corr_method}.txt", "w+")
         txt.write(f"\nStarting with {exp_name}! \n")
         txt.write(f"\n{exp_name}: {len(s0)} experiments; {exp_df.Subjects.sum()} unique subjects (average of {exp_df.Subjects.mean():.1f} per experiment) \n")
         
-        if isfile(f"{cwd}/ALE/Results/{exp_name}_{corr_method}05.nii"):
+        if isfile(f"{cwd}/Results/MainEffect/Full/Volumes/Corrected/{exp_name}_{corr_method}05.nii"):
             # load in results that are corrected by the specific method
-            results = nb.load(f"{cwd}/ALE/MainEffect/Results/{exp_name}_{corr_method}05.nii").get_fdata()
+            results = nb.load(f"{cwd}/Results/MainEffect/Full/Volumes/Corrected/{exp_name}_{corr_method}05.nii").get_fdata()
             results = np.nan_to_num(results)
             if results.any() > 0:    
-                ale = nb.load(f"{cwd}/ALE/Volumes/{exp_name}.nii")
+                ale = nb.load(f"{cwd}/Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii")
                 # cluster the significant voxels
                 labels, cluster_count = ndimage.label(results)
                 label, count = np.unique(labels, return_counts=True)
@@ -51,10 +39,10 @@ def contribution(exp_df, exp_name, exp_idxs, tasks):
                         txt.write(f"\n\nCluster {index+1}: {clust_size} voxel [Center: {int(center[0])}/{int(center[1])}/{int(center[2])}] \n")
                         
                         # calculate the relative contribution of each study to the cluster voxels total ALE
-                        ax = exp_data[:, clust_ind[0], clust_ind[1], clust_ind[2]]
+                        ax = ma[:, clust_ind[0], clust_ind[1], clust_ind[2]]
                         axf = 1-np.prod(1-ax, axis=0) # ale values
                         axr = np.array([1-np.prod(1-np.delete(ax, i, axis=0), axis=0) for i in s0]) # ale values if one study would be omitted
-                        wig = np.array([np.sum(exp_data[i][tuple(clust_ind)]) for i in s0]) # summing MA over the cluster per study
+                        wig = np.array([np.sum(ma[i][tuple(clust_ind)]) for i in s0]) # summing MA over the cluster per study
                         # summarizing array for each study: 1. total MA in cluster 2. average MA per voxel in cluster
                         # 3. relative contribution to cluster ale 4. maximum ale contribution in the cluster (single voxel)
                         xsum = np.array([[wig[i], 100*wig[i]/clust_size, 100*(1-np.mean(np.divide(axr[i,:], axf))), np.max(100*(1-np.divide(axr[i,:], axf)))] for i in s0])
