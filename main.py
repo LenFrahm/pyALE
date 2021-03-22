@@ -27,7 +27,7 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(cwd, meta_df, exp_all, tasks):
+def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, diff_repeats=500):
     for row_idx in range(meta_df.shape[0]):
         if type(meta_df.iloc[row_idx, 0]) != str:
             continue
