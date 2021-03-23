@@ -1,9 +1,8 @@
 import nibabel as nb
-from nilearn import datasets
 import numpy as np
 import os
 
-template = datasets.load_mni152_brain_mask()
+template = nb.load("Grey10.nii")
 
 data = template.get_fdata()
 shape = data.shape

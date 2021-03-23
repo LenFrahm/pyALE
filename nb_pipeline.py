@@ -6,7 +6,7 @@ import pickle
 from main_effect import main_effect
 from contrast import contrast
 from legacy_contrast import legacy_contrast
-from compile_studies import from_excel
+from compile_studies import compile_studies
 from contribution import contribution
 from folder_setup import folder_setup
 from roi import check_rois
@@ -27,15 +27,16 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, diff_repeats=500):
+def analysis(path, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, diff_repeats=500):
     for row_idx in range(meta_df.shape[0]):
         if type(meta_df.iloc[row_idx, 0]) != str:
             continue
         if meta_df.iloc[row_idx, 0] == 'M': #Main Effect Analysis       
             if not isdir("Results/MainEffect/Full"):
-                folder_setup(cwd, "MainEffect_Full")           
+                folder_setup(path, "MainEffect_Full")           
             exp_name = meta_df.iloc[row_idx, 1]
-            exp_idxs, masks, mask_names = from_excel(meta_df, row_idx, tasks)
+            conditions = meta_df.iloc[row_idx, 2:].dropna().to_list()
+            exp_idxs, masks, mask_names = compile_studies(conditions, tasks)
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(exp_idxs) >= 12: 
                 print(f'{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment')
@@ -47,7 +48,7 @@ def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.0
             if len(masks) > 0:
                 print(f"{exp_name} - ROI analysis")
                 if not isdir("Results/MainEffect/ROI"):
-                    folder_setup(cwd, "MainEffect_ROI")   
+                    folder_setup(path, "MainEffect_ROI")   
                 with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
                     null_ale, _, _, _ = pickle.load(f) 
                 null_ale = np.stack(null_ale)
@@ -55,9 +56,10 @@ def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.0
 
         if meta_df.iloc[row_idx, 0][0] == "P": # Probabilistic ALE
             if not isdir("Results/MainEffect/CV"):
-                folder_setup(cwd, "MainEffect_CV")   
+                folder_setup(path, "MainEffect_CV")   
             exp_name = meta_df.iloc[row_idx, 1]
-            exp_idxs, _, _ = from_excel(meta_df, row_idx, tasks)
+            conditions = meta_df.iloc[row_idx, 2:].dropna().to_list()
+            exp_idxs, _, _ = compile_studies(conditions, tasks)
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(meta_df.iloc[row_idx, 0]) > 1:
                 target_n = int(meta_df.iloc[row_idx, 0][1:])
@@ -68,10 +70,11 @@ def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.0
 
         if meta_df.iloc[row_idx, 0] == 'C': # Contrast Analysis
             if not isdir("Results/Contrast/Full"):
-                folder_setup(cwd, "Contrast_Full")   
+                folder_setup(path, "Contrast_Full")   
             exp_names = [meta_df.iloc[row_idx, 1], meta_df.iloc[row_idx+1, 1]]
-            exp_idx1, masks, mask_names = from_excel(meta_df, row_idx, tasks)
-            exp_idxs = [exp_idx1, from_excel(meta_df, row_idx+1, tasks)[0]]
+            conditions = [meta_df.iloc[row_idx, 2:].dropna().to_list(), meta_df.iloc[row_idx+1, 2:].dropna().to_list()]
+            exp_idx1, masks, mask_names = compile_studies(conditions[0], tasks)
+            exp_idxs = [exp_idx1, compile_studies(conditions[1], tasks)[0]]
             exp_dfs = [exp_all.loc[exp_idxs[0]].reset_index(drop=True), exp_all.loc[exp_idxs[1]].reset_index(drop=True)]
 
             if len(exp_idxs[0]) >= 12 and len(exp_idxs[1]) >= 12:
@@ -94,15 +97,16 @@ def analysis(cwd, meta_df, exp_all, tasks, null_repeats=1000, cluster_thresh=0.0
                 if len(masks) > 0:
                     print(f"{exp_names[0]} x {exp_names[1]} - ROI analysis")
                     if not isdir("Results/Contrast/ROI"):
-                        folder_setup(cwd, "Contrast_ROI")   
+                        folder_setup(path, "Contrast_ROI")   
                     check_rois(exp_dfs, exp_names, masks, mask_names, null_repeats=10000)
 
         if meta_df.iloc[row_idx, 0][0] == 'B': # Balanced Contrast Analysis:
             if not isdir("Results/Contrast/Balanced"):
-                folder_setup(cwd, "Contrast_Balanced")   
+                folder_setup(path, "Contrast_Balanced")   
             exp_names = [meta_df.iloc[row_idx, 1], meta_df.iloc[row_idx+1, 1]]
-            exp_idx1, _, _ = from_excel(meta_df, row_idx, tasks)
-            exp_idxs = [exp_idx1, from_excel(meta_df, row_idx+1, tasks)[0]]
+            conditions = [meta_df.iloc[row_idx, 2:].dropna().to_list(), meta_df.iloc[row_idx+1, 2:].dropna().to_list()]
+            exp_idx1, _, _ = compile_studies(conditions[0], tasks)
+            exp_idxs = [exp_idx1, compile_studies(conditions[1], tasks)[0]]
             exp_dfs = [exp_all.loc[exp_idxs[0]].reset_index(drop=True), exp_all.loc[exp_idxs[1]].reset_index(drop=True)]
             n = [len(exp_idxs[0]), len(exp_idxs[1])]
 

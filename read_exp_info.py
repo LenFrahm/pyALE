@@ -19,10 +19,10 @@ def read_exp_info(filename):
 
     lines_columns = ['Author', 'Subjects', 'XYZmm', 'Space', 'Cond', 'ExpIndex']
     lines = pd.DataFrame(columns=lines_columns)
-    lines.Author = df.Articles
-    lines.Subjects = df.Subjects.astype(int)
-    lines.XYZmm = [[df.x[i], df.y[i], df.z[i]]for i in range(df.shape[0])]
-    lines.Space = df["Coordinates space"]
+    lines.Author = df.iloc[:, 0]
+    lines.Subjects = df.iloc[:,1].astype(int)
+    lines.XYZmm = [[df.iloc[:,2][i], df.iloc[:,3][i], df.iloc[:,4][i]]for i in range(df.shape[0])]
+    lines.Space = df.iloc[:,5]
     lines.Cond = [df.iloc[i,6:].dropna().str.lower().str.strip().values for i in range(df.shape[0])]
 
     cnt_exp = 0

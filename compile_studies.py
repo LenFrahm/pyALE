@@ -2,8 +2,7 @@ import pandas as pd
 import nibabel as nb
 import numpy as np
 
-def from_excel(exp_df, row_index, tasks):
-    conditions = exp_df.iloc[row_index, 2:].dropna().to_list()
+def compile_studies(conditions, tasks):
     to_use = []
     not_to_use = []
     masks = []
@@ -46,6 +45,3 @@ def from_excel(exp_df, row_index, tasks):
         to_use = to_use.differences(not_to_use)
         
     return to_use, masks, mask_names
-
-def from_cmdl():
-    pass

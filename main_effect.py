@@ -84,7 +84,6 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
             print(f'{exp_name} - loading ALE')
             print(f'{exp_name} - loading null PDF')
             ale = nb.load(f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii').get_fdata()
-            ale = np.nan_to_num(ale)
             with open(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle', 'rb') as f:
                 hx_conv, _ = pickle.load(f)    
                 
@@ -106,9 +105,7 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
         if isfile(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii'):
             print(f'{exp_name} - loading p-values & TFCE')
             z = nb.load(f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii').get_fdata()
-            z = np.nan_to_num(z)
-            tfce = nb.load(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii').get_fdata()
-            tfce= np.nan_to_num(tfce)      
+            tfce = nb.load(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii').get_fdata()   
             
         else:
             print(f'{exp_name} - computing p-values & TFCE')

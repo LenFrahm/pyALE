@@ -263,13 +263,11 @@ def compute_sig_diff(fx, mask, ale_diff, perm_diff, null_repeats, diff_thresh):
 def plot_and_save(arr, img_folder=None, nii_folder=None):
     # Function that takes brain array and transforms it to NIFTI1 format
     # Saves it both as a statmap png and as a Nifti file
-    arr[~prior] = np.nan
     nii_img = nb.Nifti1Image(arr, affine)
     if img_folder:
         plotting.plot_stat_map(nii_img, output_file=img_folder)
     if nii_folder:
         nb.save(nii_img, nii_folder)
-    arr = np.nan_to_num(arr)
     
     return arr
 
