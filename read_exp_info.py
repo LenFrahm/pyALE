@@ -11,7 +11,7 @@ from template import shape, affine
 def read_exp_info(filename):
 
     df = pd.read_excel(filename, engine='openpyxl')
-    df = df[df['Articles'].notnull()].reset_index(drop=True)
+    df = df[df.iloc[:,0].notnull()].reset_index(drop=True)
 
     x_max = shape[0]
     y_max = shape[1]

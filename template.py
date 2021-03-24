@@ -2,7 +2,8 @@ import nibabel as nb
 import numpy as np
 import os
 
-template = nb.load("Grey10.nii")
+path = os.path.abspath(__file__)
+template = nb.load(f"{path[:-11]}/Grey10.nii")
 
 data = template.get_fdata()
 shape = data.shape

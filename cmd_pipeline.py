@@ -27,6 +27,7 @@ if __name__ == '__main__':
     type_ = args.type
     exp_name = args.name
     conditions = args.cats
+    path = os.getcwd()
     if type_[0] in ["C", "B"]:
         if args.name2 is None:
             print("When selecting one of the contrast procedures a 2nd analysis needs to be specified. Please check --help for syntax specifics.")
