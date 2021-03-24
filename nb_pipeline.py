@@ -28,6 +28,8 @@ def setup(path, analysis_info_name, experiment_info_name):
     return meta_df, exp_all, tasks
 
 def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, diff_repeats=1000):
+    os.chdir(path)
+    
     for row_idx in range(meta_df.shape[0]):
         if type(meta_df.iloc[row_idx, 0]) != str:
             continue
@@ -40,7 +42,7 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(exp_idxs) >= 12: 
                 print(f'{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment')
-                main_effect(exp_df, exp_name, cluster_thresh=0.001, null_repeats=1000)
+                main_effect(exp_df, exp_name, cluster_thresh=0.001, null_repeats=null_repeats)
                 contribution(exp_df, exp_name, exp_idxs, tasks)
             else:
                 print(f"{exp_name} : only {len(exp_idxs)} experiments - not analyzed!")
@@ -52,7 +54,7 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
                 with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
                     null_ale, _, _, _ = pickle.load(f) 
                 null_ale = np.stack(null_ale)
-                check_rois(exp_df, exp_name, masks, mask_names, null_repeats=1000, null_ale=null_ale)
+                check_rois(exp_df, exp_name, masks, mask_names, null_repeats=null_repeats, null_ale=null_ale)
 
         if meta_df.iloc[row_idx, 0][0] == "P": # Probabilistic ALE
             if not isdir("Results/MainEffect/CV"):
@@ -63,7 +65,7 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(meta_df.iloc[row_idx, 0]) > 1:
                 target_n = int(meta_df.iloc[row_idx, 0][1:])
-                main_effect(exp_df, exp_name, null_repeats=1000, target_n=target_n, sample_n=2500)
+                main_effect(exp_df, exp_name, null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
             else:
                 print(f"{exp_name}: need to specify subsampling")
                 continue
@@ -79,10 +81,10 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
             if len(exp_idxs[0]) >= 12 and len(exp_idxs[1]) >= 12:
                 if not isfile(f"Results/MainEffect/Full/Volumes/Corrected/{exp_names[0]}_cFWE05.nii"):
-                    main_effect(exp_dfs[0], exp_names[0], null_repeats = 1000)
+                    main_effect(exp_dfs[0], exp_names[0], null_repeats = null_repeats)
                     contribution(exp_dfs[0], exp_names[0], exp_idxs[0], tasks)
                 if not isfile(f"Results/MainEffect/Full/Volumes/Corrected/{exp_names[1]}_cFWE05.nii"):
-                    main_effect(exp_dfs[1], exp_names[1], null_repeats = 1000)
+                    main_effect(exp_dfs[1], exp_names[1], null_repeats = null_repeats)
                     contribution(exp_dfs[1], exp_names[1], exp_idxs[1], tasks)
 
                 for i in reversed(exp_idxs[0]):
@@ -92,13 +94,13 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
                 exp_dfs = [exp_all.loc[exp_idxs[0]].reset_index(drop=True), exp_all.loc[exp_idxs[1]].reset_index(drop=True)]
 
-                legacy_contrast(exp_dfs, exp_names, diff_thresh=0.05, null_repeats=10000)
+                legacy_contrast(exp_dfs, exp_names, diff_thresh=diff_thresh, null_repeats=null_repeats)
 
                 if len(masks) > 0:
                     print(f"{exp_names[0]} x {exp_names[1]} - ROI analysis")
                     if not isdir("Results/Contrast/ROI"):
                         folder_setup(path, "Contrast_ROI")   
-                    check_rois(exp_dfs, exp_names, masks, mask_names, null_repeats=10000)
+                    check_rois(exp_dfs, exp_names, masks, mask_names, null_repeats=null_repeats)
 
         if meta_df.iloc[row_idx, 0][0] == 'B': # Balanced Contrast Analysis:
             if not isdir("Results/Contrast/Balanced"):
@@ -119,8 +121,8 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
                     target_n = int(min(np.floor(np.mean((np.min(n), 17))), np.min(n)-2))
 
                 if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[0]}_{target_n}.nii'):
-                    main_effect(exp_dfs[0], exp_names[0], null_repeats=1000, target_n=target_n, sample_n=2500)
+                    main_effect(exp_dfs[0], exp_names[0], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
                 if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[1]}_{target_n}.nii'):
-                    main_effect(exp_dfs[1], exp_names[1], null_repeats=1000, target_n=target_n, sample_n=2500)
+                    main_effect(exp_dfs[1], exp_names[1], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
 
-                contrast(exp_dfs, exp_names, null_repeats=1000, target_n=target_n, diff_repeats=500)
+                contrast(exp_dfs, exp_names, null_repeats=null_repeats, target_n=target_n, diff_repeats=diff_repeats)

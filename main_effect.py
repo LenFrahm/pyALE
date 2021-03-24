@@ -7,7 +7,6 @@ import pickle
 from joblib import Parallel, delayed
 from template import sample_space
 from compute import *
-
      
 def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
     # Declare variables for future calculations
@@ -127,15 +126,13 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
             # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
             # peaks are randomly distributed in the sample space. Then calculate all metrics that have
             # been calculated for the 'actual' data to create a null distribution unde the assumption of indipendence of results
-            null_ale, max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)
-                                                          (delayed(compute_null_cutoffs)(s0=s0,
-                                                                                         sample_space=sample_space,
-                                                                                         num_peaks=exp_df.Peaks,
-                                                                                         kernels=exp_df.Kernels,
-                                                                                         thresh=cluster_thresh,
-                                                                                         hx_conv=hx_conv,
-                                                                                         tfce=1) for i in range(null_repeats)))
-        # save simulation results to pickle
+            null_ale, max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
+                                                                                                                         sample_space = sample_space,
+                                                                                                                         num_peaks = exp_df.Peaks,
+                                                                                                                         kernels = exp_df.Kernels,
+                                                                                                                         hx_conv = hx_conv,
+                                                                                                                         tfce=1) for i in range(null_repeats)))
+                    # save simulation results to pickle
             simulation_pickle = (null_ale, max_ale, max_cluster, max_tfce)
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
                 pickle.dump(simulation_pickle, f)
