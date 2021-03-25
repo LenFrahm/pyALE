@@ -7,10 +7,10 @@ from joblib import Parallel, delayed
 from scipy.stats import norm
 from nilearn import plotting
 from scipy import ndimage
-from kernel import kernel_conv
-from compute import compute_ale_diff, compute_perm_diff, compute_sig_diff, plot_and_save
+from utils.kernel import kernel_conv
+from utils.compute import compute_ale_diff, compute_perm_diff, compute_sig_diff, plot_and_save
 # importing brain template information
-from template import shape, pad_shape, prior, affine
+from utils.template import shape, pad_shape, prior, affine
 
 EPS = np.finfo(float).eps # float precision
 

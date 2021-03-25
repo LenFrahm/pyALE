@@ -6,8 +6,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from scipy.stats import norm
 import pickle
-from template import prior, affine, shape, pad_shape, sample_space
-from compute import *
+from utils.template import prior, affine, shape, pad_shape, sample_space
+from utils.compute import plot_and_save, compute_ale_diff, compute_null_diff
 
 
 def contrast(exp_dfs, exp_names, null_repeats=1000, target_n="Full", diff_repeats=1000):

@@ -3,9 +3,8 @@ from os.path import isfile
 import numpy as np
 import nibabel as nb
 from scipy import ndimage
-from kernel import kernel_conv
-# importing brain template information
-from template import shape, pad_shape, prior, affine
+from utils.kernel import kernel_conv
+from utils.template import shape, pad_shape, prior, affine
 
 
 def contribution(exp_df, exp_name, exp_idxs, tasks):

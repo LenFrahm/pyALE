@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 path = os.path.abspath(__file__)
-template = nb.load(f"{path[:-11]}/Grey10.nii")
+template = nb.load(f"{path[:-11]}/mask/Grey10.nii")
 
 data = template.get_fdata()
 shape = data.shape

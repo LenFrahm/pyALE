@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from compute import compute_ale, compute_perm_diff
+from utils.compute import compute_ale, compute_perm_diff
 from joblib import Parallel, delayed
 
 def roi_ale(exp_df, exp_name, masks, mask_names, null_repeats, null_ale):

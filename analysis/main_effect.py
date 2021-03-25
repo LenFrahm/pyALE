@@ -5,8 +5,8 @@ import numpy as np
 import nibabel as nb
 import pickle
 from joblib import Parallel, delayed
-from template import sample_space
-from compute import *
+from utils.template import sample_space
+from utils.compute import *
      
 def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
     # Declare variables for future calculations

@@ -3,14 +3,14 @@ from os.path import isfile, isdir
 import pandas as pd
 import numpy as np
 import pickle
-from main_effect import main_effect
-from contrast import contrast
-from legacy_contrast import legacy_contrast
-from compile_studies import compile_studies
-from contribution import contribution
-from folder_setup import folder_setup
-from roi import check_rois
-from read_exp_info import read_exp_info
+from analysis.main_effect import main_effect
+from analysis.contrast import contrast
+from analysis.legacy_contrast import legacy_contrast
+from analysis.roi import check_rois
+from utils.compile_studies import compile_studies
+from utils.contribution import contribution
+from utils.folder_setup import folder_setup
+from utils.read_exp_info import read_exp_info
 
 def setup(path, analysis_info_name, experiment_info_name):
     os.chdir(path)
@@ -72,7 +72,9 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
         if meta_df.iloc[row_idx, 0] == 'C': # Contrast Analysis
             if not isdir("Results/Contrast/Full"):
-                folder_setup(path, "Contrast_Full")   
+                folder_setup(path, "Contrast_Full")
+            if not isdir("Results/MainEffect/Full"):
+                folder_setup(path, "MainEffect_Full") 
             exp_names = [meta_df.iloc[row_idx, 1], meta_df.iloc[row_idx+1, 1]]
             conditions = [meta_df.iloc[row_idx, 2:].dropna().to_list(), meta_df.iloc[row_idx+1, 2:].dropna().to_list()]
             exp_idx1, masks, mask_names = compile_studies(conditions[0], tasks)
@@ -104,7 +106,9 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
         if meta_df.iloc[row_idx, 0][0] == 'B': # Balanced Contrast Analysis:
             if not isdir("Results/Contrast/Balanced"):
-                folder_setup(path, "Contrast_Balanced")   
+                folder_setup(path, "Contrast_Balanced")
+            if not isdir("Results/MainEffect/CV"):
+                folder_setup(path, "MainEffect_CV") 
             exp_names = [meta_df.iloc[row_idx, 1], meta_df.iloc[row_idx+1, 1]]
             conditions = [meta_df.iloc[row_idx, 2:].dropna().to_list(), meta_df.iloc[row_idx+1, 2:].dropna().to_list()]
             exp_idx1, _, _ = compile_studies(conditions[0], tasks)

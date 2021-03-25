@@ -4,7 +4,7 @@ from math import sqrt, log, ceil, pi
 import pandas as pd
 import numpy as np
 # importing brain template shape
-from template import pad_shape
+from utils.template import pad_shape
 
 def kernel_calc(affine, fwhm, dims):
     #Conversion from fwhm to sigma based on affine

@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import nibabel as nb
 import pickle
-from kernel import kernel_calc, kernel_conv
-from tal2icbm_spm import tal2icbm_spm
-from template import shape, affine
+from utils.kernel import kernel_calc, kernel_conv
+from utils.tal2icbm_spm import tal2icbm_spm
+from utils.template import shape, affine
 
 
 def read_exp_info(filename):

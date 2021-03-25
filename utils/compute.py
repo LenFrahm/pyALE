@@ -3,13 +3,13 @@ import numpy as np
 import pandas as pd
 import nibabel as nb
 import matplotlib.pyplot as plt
-from tfce_par import tfce_par
 from scipy import ndimage
 from scipy.stats import norm
 from nilearn import plotting
 from joblib import Parallel, delayed
-from template import shape, pad_shape, prior, affine, sample_space
-from kernel import kernel_conv
+from utils.tfce_par import tfce_par
+from utils.template import shape, pad_shape, prior, affine, sample_space
+from utils.kernel import kernel_conv
 
 EPS =  np.finfo(float).eps
 cwd = os.getcwd()
