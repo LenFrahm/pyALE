@@ -115,27 +115,6 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
             tfce = plot_and_save(tfce, img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}.png',
                                        nii_folder=f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii')
 
-        """ Null distribution calculation """
-
-        if isfile(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle"):
-            print(f'{exp_name} - loading null')
-            with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
-                _, max_ale, max_cluster, max_tfce = pickle.load(f)            
-        else:
-            print(f'{exp_name} - simulating null')       
-            # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
-            # peaks are randomly distributed in the sample space. Then calculate all metrics that have
-            # been calculated for the 'actual' data to create a null distribution unde the assumption of indipendence of results
-            null_ale, max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
-                                                                                                                         sample_space = sample_space,
-                                                                                                                         num_peaks = exp_df.Peaks,
-                                                                                                                         kernels = exp_df.Kernels,
-                                                                                                                         hx_conv = hx_conv,
-                                                                                                                         tfce=1) for i in range(null_repeats)))
-                    # save simulation results to pickle
-            simulation_pickle = (null_ale, max_ale, max_cluster, max_tfce)
-            with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
-                pickle.dump(simulation_pickle, f)
 
         """ Multiple comparison error correction: FWE, cFWE, TFCE """
 

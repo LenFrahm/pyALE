@@ -101,17 +101,18 @@ def compute_tfce(z, sample_space):
     
     delta_t = np.max(z)/100
     
-    tmp = np.zeros(z.shape)
+    tmp = np.zeros((18, z.shape[0], z.shape[1], z.shape[2]))
     # calculate tfce values using the parallelized function
-    vals, masks = zip(*Parallel(n_jobs=-1)
+    vals, masks = zip(*Parallel(n_jobs=1)
                      (delayed(tfce_par)(invol=z, h=h, dh=delta_t) for h in np.arange(0, np.max(z), delta_t)))
     # Parallelization makes it necessary to integrate the results afterwards
     # Each repition creats it's own mask and an amount of values corresponding to that mask
-    for i in range(len(vals)):
-        tmp[masks[i]] += vals[i]
+    for x in range(18):    
+        for i in range(len(vals[x])):
+            tmp[x,masks[i]] += vals[x][i]
         
-    tfce = np.zeros(shape)
-    tfce[lc[0]:uc[0],lc[1]:uc[1],lc[2]:uc[2]] = tmp
+    tfce = np.zeros((18,shape[0],shape[1],shape[2]))
+    tfce[:,lc[0]:uc[0],lc[1]:uc[1],lc[2]:uc[2]] = tmp
     
     return tfce
 
@@ -163,7 +164,9 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
     if tfce:
         tfce = compute_tfce(null_z, sample_space)
         # TFCE threshold
-        null_max_tfce = np.max(tfce)
+        null_max_tfce = []
+        for i in range(18):
+            null_max_tfce.append(np.max(tfce[i]))
         return null_ale, null_max_ale, null_max_cluster, null_max_tfce
         
     return null_max_ale, null_max_cluster

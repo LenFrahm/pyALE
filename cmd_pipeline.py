@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('name', type=str, help='Name given to analysis; used for provenance tracking')
     parser.add_argument('tags', type=str, nargs='+', default="All", help='Tags of experiments to include in analysis; check instructions file for syntax')
     parser.add_argument('-n2', metavar='name2', type=str, help='for contrasts there needs to be a 2nd analysis specified; name of the second')
-    parser.add_argument('-t2', metavar='tags', type=str, nargs='+', help='categories for 2nd analysis')
+    parser.add_argument('-t2', metavar='tags2', type=str, nargs='+', help='categories for 2nd analysis')
     parser.add_argument('-nr', metavar='n_rep', type=int, help='number of iterations to use for null simulation')
     parser.add_argument('-ct', metavar='cluster_thresh', type=int, help='significance level used to threshold cluster forming')
     parser.add_argument('-sn', metavar='sample_n', type=int, help='amount of subsamples taken from experiment pool; used in P and B')

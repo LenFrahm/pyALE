@@ -72,7 +72,7 @@ def read_exp_info(filename):
 
     tasks_columns = ['Name', 'Num_Exp', 'Who', 'TotalSubjects', 'ExpIndex']
     tasks = pd.DataFrame(columns=tasks_columns)
-    tasks.Name = np.append(task_names, 'all')
+    tasks.Name = np.append(task_names, 'All')
     tasks.Num_Exp = np.append(task_counts, experiments.shape[0])
 
     for task_row, value in enumerate(list(tasks.Name)):
