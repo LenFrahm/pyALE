@@ -26,6 +26,15 @@ if __name__ == '__main__':
     type_ = args.type
     exp_name = args.name
     conditions = args.tags
+    
+    if not os.path.isdir("tmp"):
+        os.mkdir("tmp")
+    
+    if not os.path.isdir("Results"):
+        os.mkdir("Results")
+
+    if not os.path.isdir("Results/MainEffect/Full"):
+        folder_setup(path, "MainEffect_Full")
 
     if isfile(f'Results/{file}.pickle'):
         with open(f'Results/{file}.pickle', 'rb') as f:
@@ -85,7 +94,7 @@ if __name__ == '__main__':
 
         z = plot_and_save(z, nii_folder=f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii')
         for i in range(18):
-            tfce = plot_and_save(tfce[i], img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}_{i}.png',
+            out = plot_and_save(tfce[i], img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}_{i}.png',
                                        nii_folder=f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}_{i}.nii')
     
     np.save(f"tmp/{exp_name}_num_peaks", exp_df.Peaks.values)
