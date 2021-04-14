@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import nibabel as nb
 import matplotlib.pyplot as plt
+from functools import reduce
+import operator
 from scipy import ndimage
 from scipy.stats import norm
 from nilearn import plotting
@@ -12,7 +14,6 @@ from utils.template import shape, pad_shape, prior, affine, sample_space
 from utils.kernel import kernel_conv
 
 EPS =  np.finfo(float).eps
-cwd = os.getcwd()
 
 """ Main Effect Computations """
 
@@ -27,18 +28,18 @@ def illustrate_foci(peaks):
     return foci_arr
 
 
-def compute_ma(s0, peaks, kernels):
-    ma = np.zeros((len(s0), shape[0], shape[1], shape[2]))
-    for i, s in enumerate(s0):
+def compute_ma(peaks, kernels):
+    ma = np.zeros((len(kernels), shape[0], shape[1], shape[2]))
+    for i, kernel in enumerate(kernels):
         ma[i, :] = kernel_conv(peaks = peaks[i], 
-                               kernel = kernels[s])
+                               kernel = kernel)
         
     return ma
 
 
-def compute_hx(s0, ma, bin_edges):
-    hx = np.zeros((len(s0), len(bin_edges)))
-    for i, s in enumerate(s0):
+def compute_hx(ma, bin_edges):
+    hx = np.zeros((ma.shape[0], len(bin_edges)))
+    for i in range(ma.shape[0]):
         data = ma[i, :]
         bin_idxs, counts = np.unique(np.digitize(data[prior], bin_edges),return_counts=True)
         hx[i,bin_idxs] = counts
@@ -49,20 +50,20 @@ def compute_ale(ma):
     return 1-np.prod(1-ma, axis=0)
 
 
-def compute_hx_conv(s0, hx, bin_centers, step):    
-    ale_hist = hx[s0[0],:]
-    for i in s0[1:]:
+def compute_hx_conv(hx, bin_centers, step):    
+    ale_hist = hx[0,:]
+    for x in range(1,hx.shape[0]):
         v1 = ale_hist
         # save bins, which there are entries in the combined hist
         da1 = np.where(v1 > 0)[0]
         # normalize combined hist to sum to 1
         v1 = ale_hist/np.sum(v1)
         
-        v2 = hx[i,:]
+        v2 = hx[x,:]
         # save bins, which there are entries in the study hist
         da2 = np.where(v2 > 0)[0]
         # normalize study hist to sum to 1
-        v2 = hx[i,:]/np.sum(v2)
+        v2 = hx[x,:]/np.sum(v2)
         ale_hist = np.zeros((len(bin_centers),))
         #iterate over bins, which contain values
         for i in range(len(da2)):
@@ -88,31 +89,38 @@ def compute_z(ale, hx_conv, step):
     return z
 
 
-def compute_tfce(z, sample_space):
-    
-    if z.shape != shape:
-        tmp = np.zeros(shape)
-        tmp[tuple(sample_space)] = z
-        z = tmp
-    
-    lc = np.min(sample_space, axis=1)
-    uc = np.max(sample_space, axis=1)  
-    z = z[lc[0]:uc[0],lc[1]:uc[1],lc[2]:uc[2]]
-    
+def compute_tfce(z, parameter_test=False, voxel_dims=[2,2,2]):  
     delta_t = np.max(z)/100
-    
-    tmp = np.zeros((18, z.shape[0], z.shape[1], z.shape[2]))
-    # calculate tfce values using the parallelized function
-    vals, masks = zip(*Parallel(n_jobs=1)
-                     (delayed(tfce_par)(invol=z, h=h, dh=delta_t) for h in np.arange(0, np.max(z), delta_t)))
+    tfce = np.zeros(shape)
+        
+    for h in np.arange(0, np.max(z), delta_t):
+        thresh = np.array(z > h)
+        #look for suprathreshold clusters
+        labels, cluster_count = ndimage.label(thresh)
+        #calculate the size of the cluster; first voxel count, then multiplied with the voxel volume in mm
+        _ , sizes = np.unique(labels, return_counts=True)
+        sizes[0] = 0 
+        sizes = sizes * reduce(operator.mul, voxel_dims)
+        #mask out labeled areas to not perform tfce calculation on the whole brain
+        mask = labels > 0
+        szs = sizes[labels[mask]]
+        if parameter_test:
+            for E in np.arange(0.2,1,0.1):
+                for H in np.arange(1.5,2.5,0.1):
+                    update_vals.append(np.multiply(np.power(h, H)*delta_t, np.power(szs, E)))
+        else:
+            H = 2
+            E = 0.5
+            tfce[mask] = np.multiply(np.power(h, H)*delta_t, np.power(szs, E))
     # Parallelization makes it necessary to integrate the results afterwards
     # Each repition creats it's own mask and an amount of values corresponding to that mask
-    for x in range(18):    
-        for i in range(len(vals[x])):
-            tmp[x,masks[i]] += vals[x][i]
-        
-    tfce = np.zeros((18,shape[0],shape[1],shape[2]))
-    tfce[:,lc[0]:uc[0],lc[1]:uc[1],lc[2]:uc[2]] = tmp
+    if parameter_test:
+        tfce = []
+        for x in range(18):
+            tmp = np.zeros(shape)
+            for i in range(len(update_vals[x])):
+                tmp[masks[i]] += update_vals[i][x]
+            tfce.append(tmp)
     
     return tfce
 
@@ -136,37 +144,30 @@ def compute_cluster(z, thresh, sample_space=None, cut_cluster=None):
     return max_clust
 
 
-def compute_null_ale(s0, sample_space, num_peaks, kernels):   
-    null_peaks = np.array([sample_space[:,np.random.randint(0,sample_space.shape[1], num_peaks[i])].T for i in s0], dtype=object)
-    null_ma = compute_ma(s0, null_peaks, kernels)
+def compute_null_ale(sample_space, num_foci, kernels):   
+    null_peaks = np.array([sample_space[:,np.random.randint(0,sample_space.shape[1], num_foci[i])].T for i in range(len(num_foci))], dtype=object)
+    null_ma = compute_ma(null_peaks, kernels)
     null_ale = compute_ale(null_ma)
     
     return null_ma, null_ale
     
     
-def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thresh=0.001, target_n=None,
-                          hx_conv=None, bin_edges=None, bin_centers=None, tfce=None):
-    if target_n:
-        s0 = np.random.permutation(s0)
-        s0 = s0[:target_n]
-    # compute ALE values based on random peak locations sampled from a give sample_space
-    # sample space could be all grey matter or only foci reported in brainmap
-    null_ma, null_ale = compute_null_ale(s0, sample_space, num_peaks, kernels)
+def compute_null_cutoffs(sample_space, num_foci, kernels, step=10000, thresh=0.001, target_n=None,
+                          hx_conv=None, bin_edges=None, bin_centers=None, tfce=None, parameter_test=False):
+    null_ma, null_ale = compute_null_ale(sample_space, num_foci, kernels)
     # Peak ALE threshold
     null_max_ale = np.max(null_ale)
-    if hx_conv is None:
-        s0 = list(range(len(s0)))
-        null_hx = compute_hx(s0, null_ma, bin_edges)
-        hx_conv = compute_hx_conv(s0, null_hx, bin_centers, step)
     null_z = compute_z(null_ale, hx_conv, step)
     # Cluster level threshold
     null_max_cluster = compute_cluster(null_z, thresh, sample_space)
     if tfce:
-        tfce = compute_tfce(null_z, sample_space)
+        tfce = compute_tfce(null_z, parameter_test=parameter_test)
         # TFCE threshold
-        null_max_tfce = []
-        for i in range(18):
-            null_max_tfce.append(np.max(tfce[i]))
+        if parameter_test:        
+            null_max_tfce = []
+            for i in range(18):
+                null_max_tfce.append(np.max(tfce[i]))
+        else: null_max_tfce = np.max(tfce)
         return null_ale, null_max_ale, null_max_cluster, null_max_tfce
         
     return null_max_ale, null_max_cluster

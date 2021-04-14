@@ -5,93 +5,68 @@ from os.path import isfile, isdir
 import pandas as pd
 import numpy as np
 import nibabel as nb
-from utils.template import sample_space
-from utils.compute import illustrate_foci, compute_hx, compute_hx_conv, compute_ale, compute_z, compute_tfce, plot_and_save
-from utils.compile_studies import compile_studies
-from utils.folder_setup import folder_setup
-from utils.read_exp_info import read_exp_info
+import h5py
+from utils.template import sample_space, affine
+from utils.kernel import kernel_calc
+from utils.compute import compute_ma, compute_hx, compute_hx_conv, compute_ale, compute_z, compute_tfce
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Initates ALE Meta-Analysis.')
-    parser.add_argument('path', type=str, help='working path')
     parser.add_argument('file', type=str, help='Filename of excel file that stores study information (coordinates, etc.)')
-    parser.add_argument('type', type=str, help='Type of Analysis; check instructions file for possible types')
-    parser.add_argument('name', type=str, help='Name given to analysis; used for provenance tracking')
-    parser.add_argument('tags', type=str, nargs='+', help='Tags of experiments to include in analysis; check instructions file for syntax')
+    parser.add_argument('num_studies', type=int, help='Number of studies in the meta-analyses')
+    parser.add_argument('num_true', type=int, help='Number of true activations in the meta-anylses')
+    parser.add_argument('rep', type=int, help='Which sampling repitition to load data from.')
+    parser.add_argument('-pt', nargs="?", default=False, help="Whether or not to run a TFCE parameter test. Can be True or False.")
+
 
     args = parser.parse_args()
-    
-    path = args.path
     file = args.file
-    type_ = args.type
-    exp_name = args.name
-    conditions = args.tags
-
-    if isfile(f'Results/{file}.pickle'):
-        with open(f'Results/{file}.pickle', 'rb') as f:
-            exp_all, tasks = pickle.load(f)
+    num_studies = int(args.num_studies)
+    num_true = int(args.num_true)
+    rep = int(args.rep)
+    parameter_test = args.pt
+    if parameter_test == "True":
+        parameter_test = True
     else:
-        exp_all, tasks = read_exp_info(f'{file}')
+        parameter_test = False
+    
+    
+    s0 = list(range(num_studies))
+
+    sim_data = h5py.File(f"{file}", "r")
+
+    sample_sizes = sim_data[f"{num_studies}/{num_true}/{rep}/sample_sizes"][:]
+    foci = []
+    for key in sim_data[f"{num_studies}/{num_true}/{rep}/foci"].keys():
+        foci.append(sim_data[f"{num_studies}/{num_true}/{rep}/foci"][key][:])
         
-    if conditions == []:
-        exp_idxs = list(range(exp_all.shape[0]))
-        exp_df = exp_all
-    else:
-        exp_idxs, masks, mask_names = compile_studies(conditions, tasks)
-        exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
+    num_foci = [foc.shape[0] for foc in foci]
 
-    s0 = list(range(exp_df.shape[0]))
-    # highest possible ale value if every study had a peak at the same location.
+    kernels = []
+    for sample_size in sample_sizes:
+        temp_uncertainty = 5.7/(2*np.sqrt(2/np.pi)) * np.sqrt(8*np.log(2))
+        subj_uncertainty = (11.6/(2*np.sqrt(2/np.pi)) * np.sqrt(8*np.log(2))) / np.sqrt(sample_size)
+        smoothing = np.sqrt(temp_uncertainty**2 + subj_uncertainty**2)
+        kernels.append(kernel_calc(affine, smoothing, 31))
+
     mb = 1
     for i in s0:
-        mb = mb*(1-np.max(exp_df.at[i, 'Kernels']))
-    
+        mb = mb*(1-np.max(kernels[i]))
+
     # define bins for histogram
     bin_steps=0.0001
     bin_edges = np.arange(0.00005,1-mb+0.001,bin_steps)
     bin_centers = np.arange(0,1-mb+0.001,bin_steps)
     step = int(1/bin_steps)
-    
-    peaks = np.array([exp_df.XYZ[i].T for i in s0], dtype=object)    
-    
-    if not isfile(f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii'):
-        foci_arr = illustrate_foci(peaks)
-        foci_arr = plot_and_save(foci_arr, img_folder=f'Results/MainEffect/Full/Images/Foci/{exp_name}.png', 
-                                           nii_folder=f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii')
 
-    ma = np.array([exp_df.MA.values[i] for i in s0])
-    hx = compute_hx(s0, ma, bin_edges)
+    ma = compute_ma(foci, kernels)
+    hx = compute_hx(ma, bin_edges)
+    ale = compute_ale(ma)
+    hx_conv = compute_hx_conv(hx, bin_centers, step)
+    z = compute_z(ale, hx_conv, step)
+    tfce = compute_tfce(z, parameter_test=parameter_test)
     
-    if isfile(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle'):
-        ale = nb.load(f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii').get_fdata()
-        with open(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle', 'rb') as f:
-            hx_conv, _ = pickle.load(f)    
-    else:
-        ale = compute_ale(ma)
-        ale = plot_and_save(ale, img_folder=f'Results/MainEffect/Full/Images/ALE/{exp_name}.png',
-                                 nii_folder=f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii')
-        hx_conv = compute_hx_conv(s0, hx, bin_centers, step)
-
-        pickle_object = (hx_conv, hx)
-        with open(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle', "wb") as f:
-            pickle.dump(pickle_object, f)
     
-    if isfile(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii'):
-        z = nb.load(f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii').get_fdata()
-        tfce = nb.load(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii').get_fdata()
-    else:
-        z = compute_z(ale, hx_conv, step)
-        tfce = compute_tfce(z, sample_space)
-
-        z = plot_and_save(z, nii_folder=f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii')
-        for i in range(18):
-            tfce = plot_and_save(tfce[i], img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}_{i}.png',
-                                       nii_folder=f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}_{i}.nii')
+    np.savez_compressed(f"Results/tmp/{num_studies}_{num_true}_{rep}", ale=ale, z=z, tfce=tfce, hx_conv=hx_conv, kernels=kernels, num_foci=num_foci)
     
-    np.save(f"tmp/{exp_name}_num_peaks", exp_df.Peaks.values)
-    np.save(f"tmp/{exp_name}_kernels", exp_df.Kernels.values)
-    np.save(f"tmp/{exp_name}_hx_conv", hx_conv)
-    
-    pickle_object = (exp_df.Subjects, exp_df.MA, exp_df.Author, exp_idxs, tasks)
-    with open(f'tmp/{exp_name}_contribution.pickle', "wb") as f:
-        pickle.dump(pickle_object, f)
+    print(np.max(tfce))

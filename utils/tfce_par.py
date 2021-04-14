@@ -3,7 +3,7 @@ from functools import reduce
 import operator
 import numpy as np
 
-def tfce_par(invol, h, dh, voxel_dims=[2,2,2]):
+def tfce_par(invol, h, dh, voxel_dims=[2,2,2], parameter_test=False):
     thresh = np.array(invol > h)
     #look for suprathreshold clusters
     labels, cluster_count = ndimage.label(thresh)
@@ -15,8 +15,13 @@ def tfce_par(invol, h, dh, voxel_dims=[2,2,2]):
     mask = labels > 0
     szs = sizes[labels[mask]]
     update_vals = []
-    for E in np.arange(0.2,1,0.1):
-        for H in np.arange(1.5,2.5,0.1):
-            update_vals.append(np.multiply(np.power(h, H)*dh, np.power(szs, E)))
+    if parameter_test:
+        for E in np.arange(0.2,1,0.1):
+            for H in np.arange(1.5,2.5,0.1):
+                update_vals.append(np.multiply(np.power(h, H)*dh, np.power(szs, E)))
+    else:
+        H = 2
+        E = 0.5
+        update_vals = np.multiply(np.power(h, H)*dh, np.power(szs, E))
         
     return update_vals, mask
