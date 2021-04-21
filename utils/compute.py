@@ -3,13 +3,8 @@ import numpy as np
 import pandas as pd
 import nibabel as nb
 import matplotlib.pyplot as plt
-from functools import reduce
-import operator
 from scipy import ndimage
 from scipy.stats import norm
-from nilearn import plotting
-from joblib import Parallel, delayed
-from utils.tfce_par import tfce_par
 from utils.template import shape, pad_shape, prior, affine, sample_space
 from utils.kernel import kernel_conv
 
@@ -100,7 +95,7 @@ def compute_tfce(z, parameter_test=False, voxel_dims=[2,2,2]):
         #calculate the size of the cluster; first voxel count, then multiplied with the voxel volume in mm
         _ , sizes = np.unique(labels, return_counts=True)
         sizes[0] = 0 
-        sizes = sizes * reduce(operator.mul, voxel_dims)
+        sizes = sizes * 8
         #mask out labeled areas to not perform tfce calculation on the whole brain
         mask = labels > 0
         szs = sizes[labels[mask]]
@@ -171,107 +166,3 @@ def compute_null_cutoffs(sample_space, num_foci, kernels, step=10000, thresh=0.0
         return null_ale, null_max_ale, null_max_cluster, null_max_tfce
         
     return null_max_ale, null_max_cluster
-
-""" CV/Subsampling ALE Computations """
-
-
-def create_samples(s0, sample_n, target_n):
-    samples = np.zeros((sample_n, target_n))
-    s_perm = s0.copy()
-    for i in range(sample_n):
-        np.random.shuffle(s_perm)
-        samples[i,:] = np.sort(s_perm[:target_n])
-    samples = np.unique(samples, axis=0)
-    unique_samples = samples.shape[0]
-    i = 0
-    while unique_samples < sample_n:
-        np.random.shuffle(s_perm)
-        samples = np.vstack((samples, np.sort(s_perm[:target_n])))
-        samples = np.unique(samples, axis=0)
-        unique_samples = samples.shape[0]
-        i += 1
-        if i == sample_n:
-            return samples.astype(int)
-    return samples.astype(int)
-
-
-def compute_sub_ale(sample, ma, hx, bin_centers, cut_cluster, step=10000, thresh=0.001):
-    hx_conv = compute_hx_conv(sample, hx, bin_centers, step)
-    ale = compute_ale(ma[sample])
-    z = compute_z(ale, hx_conv, step)
-    z, max_cluster = compute_cluster(z, thresh, sample_space=None, cut_cluster=cut_cluster)
-    z[z > 0] = 1
-    return z
-
-
-""" New Contrast Computations """
-
-
-def compute_ale_diff(s, ma_maps, prior, target_n=None):
-    ale = np.zeros((2,prior.sum()))      
-    for xi in (0,1):
-        if target_n:  
-            s_perm = np.random.permutation(s[xi])
-            s_perm = s_perm[:target_n]
-            ale[xi,:] = compute_ale(ma_maps[xi][:,prior][s_perm,:])
-        else:
-            ale[xi,:] = compute_ale(ma_maps[xi][:,prior])
-    r_diff = ale[0,:] - ale[1,:]
-    return r_diff
-
-
-def compute_null_diff(s, prior, exp_dfs, target_n=None, diff_repeats=1000):
-    prior_idxs = np.argwhere(prior > 0)
-    null_ma = []
-    for xi in (0,1):
-        null_peaks = np.array([prior_idxs[np.random.randint(0, prior_idxs.shape[0], exp_dfs[xi].Peaks[i]), :] for i in s[xi]], dtype=object)
-        null_ma.append(compute_ma(s[xi], null_peaks, exp_dfs[xi].Kernels))
-    
-    if target_n:
-        p_diff = Parallel(n_jobs=4, verbose=1)(delayed(compute_ale_diff)(s, null_ma, prior, target_n) for i in range(diff_repeats))
-        p_diff = np.mean(p_diff, axis=0)
-    else:
-        p_diff = compute_diff(s, null_ma, prior)
-        
-    min_diff, max_diff = np.min(p_diff), np.max(p_diff)
-    return min_diff, max_diff
-
-
-""" Legacy Contrast Computations"""
-
-
-def compute_perm_diff(s,masked_ma):
-    # make list with range of values with amount of studies in both experiments together
-    sr = np.arange(len(s[0])+len(s[1]))
-    sr = np.random.permutation(sr)
-    # calculate ale difference for this permutation
-    perm_diff = (1-np.prod(masked_ma[sr[:len(s[0])]], axis=0)) - (1-np.prod(masked_ma[sr[len(s[0]):]], axis=0))
-    return perm_diff
-
-def compute_sig_diff(fx, mask, ale_diff, perm_diff, null_repeats, diff_thresh):
-    n_bigger = [np.sum([diff[i] > ale_diff[i] for diff in perm_diff]) for i in range(mask.sum())]
-    prob_bigger = np.array([x / null_repeats for x in n_bigger])
-
-    z_null = norm.ppf(1-prob_bigger) # z-value
-    z_null[np.logical_and(np.isinf(z_null), z_null>0)] = norm.ppf(1-EPS)
-    z = np.minimum(fx[mask], z_null) # for values where the actual difference is consistently higher than the null distribution the minimum will be z and ->
-    sig_idxs = np.argwhere(z > norm.ppf(1-diff_thresh)).T # will most likely be above the threshold of p = 0.05 or z ~ 1.65
-    z = z[sig_idxs]
-    sig_idxs = np.argwhere(mask == True)[sig_idxs].squeeze().T
-    return z, sig_idxs
-
-
-""" Plot Utils """
-
-
-def plot_and_save(arr, img_folder=None, nii_folder=None):
-    # Function that takes brain array and transforms it to NIFTI1 format
-    # Saves it both as a statmap png and as a Nifti file
-    nii_img = nb.Nifti1Image(arr, affine)
-    if img_folder:
-        plotting.plot_stat_map(nii_img, output_file=img_folder)
-    if nii_folder:
-        nb.save(nii_img, nii_folder)
-    
-    return arr
-
