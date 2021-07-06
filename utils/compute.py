@@ -27,18 +27,18 @@ def illustrate_foci(peaks):
     return foci_arr
 
 
-def compute_ma(s0, peaks, kernels):
-    ma = np.zeros((len(s0), shape[0], shape[1], shape[2]))
-    for i, s in enumerate(s0):
+def compute_ma(peaks, kernels):
+    ma = np.zeros((len(kernels), shape[0], shape[1], shape[2]))
+    for i, kernel in enumerate(kernels):
         ma[i, :] = kernel_conv(peaks = peaks[i], 
-                               kernel = kernels[s])
+                               kernel = kernel)
         
     return ma
 
 
-def compute_hx(s0, ma, bin_edges):
-    hx = np.zeros((len(s0), len(bin_edges)))
-    for i, s in enumerate(s0):
+def compute_hx(ma, bin_edges):
+    hx = np.zeros((ma.shape[0], len(bin_edges)))
+    for i in range(ma.shape[0]):
         data = ma[i, :]
         bin_idxs, counts = np.unique(np.digitize(data[prior], bin_edges),return_counts=True)
         hx[i,bin_idxs] = counts
@@ -49,20 +49,20 @@ def compute_ale(ma):
     return 1-np.prod(1-ma, axis=0)
 
 
-def compute_hx_conv(s0, hx, bin_centers, step):    
-    ale_hist = hx[s0[0],:]
-    for i in s0[1:]:
+def compute_hx_conv(hx, bin_centers, step):    
+    ale_hist = hx[0,:]
+    for x in range(1,hx.shape[0]):
         v1 = ale_hist
         # save bins, which there are entries in the combined hist
         da1 = np.where(v1 > 0)[0]
         # normalize combined hist to sum to 1
         v1 = ale_hist/np.sum(v1)
         
-        v2 = hx[i,:]
+        v2 = hx[x,:]
         # save bins, which there are entries in the study hist
         da2 = np.where(v2 > 0)[0]
         # normalize study hist to sum to 1
-        v2 = hx[i,:]/np.sum(v2)
+        v2 = hx[x,:]/np.sum(v2)
         ale_hist = np.zeros((len(bin_centers),))
         #iterate over bins, which contain values
         for i in range(len(da2)):
@@ -137,7 +137,7 @@ def compute_cluster(z, thresh, sample_space=None, cut_cluster=None):
 
 def compute_null_ale(s0, sample_space, num_peaks, kernels):   
     null_peaks = np.array([sample_space[:,np.random.randint(0,sample_space.shape[1], num_peaks[i])].T for i in s0], dtype=object)
-    null_ma = compute_ma(s0, null_peaks, kernels)
+    null_ma = compute_ma(null_peaks, kernels)
     null_ale = compute_ale(null_ma)
     
     return null_ma, null_ale
@@ -155,8 +155,8 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
     null_max_ale = np.max(null_ale)
     if hx_conv is None:
         s0 = list(range(len(s0)))
-        null_hx = compute_hx(s0, null_ma, bin_edges)
-        hx_conv = compute_hx_conv(s0, null_hx, bin_centers, step)
+        null_hx = compute_hx(null_ma, bin_edges)
+        hx_conv = compute_hx_conv(null_hx, bin_centers, step)
     null_z = compute_z(null_ale, hx_conv, step)
     # Cluster level threshold
     null_max_cluster = compute_cluster(null_z, thresh, sample_space)
@@ -164,7 +164,7 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
         tfce = compute_tfce(null_z, sample_space)
         # TFCE threshold
         null_max_tfce = np.max(tfce)
-        return null_ale, null_max_ale, null_max_cluster, null_max_tfce
+        return null_max_ale, null_max_cluster, null_max_tfce
         
     return null_max_ale, null_max_cluster
 

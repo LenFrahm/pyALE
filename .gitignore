@@ -7,4 +7,13 @@ ALE_delta_t_diff/
 ALE2/
 ALE3/
 Results/
-
+Cw.pickle
+SD
+Simulations2.ipynb
+compute.py
+juseless_tfce.ipynb
+null_cutoffs.py
+simon_func_mni_2019_Feb_19.txt
+simon_func_mni_2021-April.txt
+simulation_data.hdf5
+tfce_test.npz

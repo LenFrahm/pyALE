@@ -33,7 +33,8 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
     for row_idx in range(meta_df.shape[0]):
         if type(meta_df.iloc[row_idx, 0]) != str:
             continue
-        if meta_df.iloc[row_idx, 0] == 'M': #Main Effect Analysis       
+        if meta_df.iloc[row_idx, 0] == 'M': #Main Effect Analysis
+            print('enter main')
             if not isdir("Results/MainEffect/Full"):
                 folder_setup(path, "MainEffect_Full")           
             exp_name = meta_df.iloc[row_idx, 1]

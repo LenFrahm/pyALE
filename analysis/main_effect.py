@@ -24,19 +24,9 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
     
     peaks = np.array([exp_df.XYZ[i].T for i in s0], dtype=object)
     
-
-    """ Foci Illustration """
-    
-    if not isfile(f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii'):
-        print(f'{exp_name} - illustrate Foci')
-        # take all peaks of included studies and indicate them with a one in a brain array
-        foci_arr = illustrate_foci(peaks)
-        foci_arr = plot_and_save(foci_arr, img_folder=f'Results/MainEffect/Full/Images/Foci/{exp_name}.png', 
-                                           nii_folder=f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii')
-    
     
     ma = np.array([exp_df.MA.values[i] for i in s0])
-    hx = compute_hx(s0, ma, bin_edges)
+    hx = compute_hx(ma, bin_edges)
     
     if target_n:
         """ Probabilistic ALE """
@@ -77,6 +67,15 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
         
         """ Full ALE """
         
+        """ Foci Illustration """
+    
+        if not isfile(f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii'):
+            print(f'{exp_name} - illustrate Foci')
+            # take all peaks of included studies and indicate them with a one in a brain array
+            foci_arr = illustrate_foci(peaks)
+            foci_arr = plot_and_save(foci_arr, img_folder=f'Results/MainEffect/Full/Images/Foci/{exp_name}.png', 
+                                               nii_folder=f'Results/MainEffect/Full/Volumes/Foci/{exp_name}.nii')
+
         """ ALE calculation """
 
         if isfile(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle'):
@@ -93,7 +92,7 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
                                      nii_folder=f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii')
             
             # Use the histograms from above to estimate a null probability density function
-            hx_conv = compute_hx_conv(s0, hx, bin_centers, step)
+            hx_conv = compute_hx_conv(hx, bin_centers, step)
 
             pickle_object = (hx_conv, hx)
             with open(f'Results/MainEffect/Full/NullDistributions/{exp_name}.pickle', "wb") as f:
@@ -120,20 +119,20 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
         if isfile(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle"):
             print(f'{exp_name} - loading null')
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
-                _, max_ale, max_cluster, max_tfce = pickle.load(f)            
+                max_ale, max_cluster, max_tfce = pickle.load(f)            
         else:
             print(f'{exp_name} - simulating null')       
             # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
             # peaks are randomly distributed in the sample space. Then calculate all metrics that have
             # been calculated for the 'actual' data to create a null distribution unde the assumption of indipendence of results
-            null_ale, max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
-                                                                                                                         sample_space = sample_space,
-                                                                                                                         num_peaks = exp_df.Peaks,
-                                                                                                                         kernels = exp_df.Kernels,
-                                                                                                                         hx_conv = hx_conv,
-                                                                                                                         tfce=1) for i in range(null_repeats)))
+            max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
+                                                                                                             sample_space = sample_space,
+                                                                                                             num_peaks = exp_df.Peaks,
+                                                                                                             kernels = exp_df.Kernels,
+                                                                                                             hx_conv = hx_conv,
+                                                                                                             tfce=1) for i in range(null_repeats)))
                     # save simulation results to pickle
-            simulation_pickle = (null_ale, max_ale, max_cluster, max_tfce)
+            simulation_pickle = (max_ale, max_cluster, max_tfce)
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
                 pickle.dump(simulation_pickle, f)
 
