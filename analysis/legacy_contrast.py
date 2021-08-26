@@ -14,7 +14,7 @@ from utils.template import shape, pad_shape, prior, affine
 
 EPS = np.finfo(float).eps # float precision
 
-def legacy_contrast(exp_dfs, exp_names, diff_thresh=0.05, null_repeats=10000):
+def legacy_contrast(exp_dfs, exp_names, diff_thresh=0.05, null_repeats=10000, masking=True):
     
     ma = [np.stack(exp_dfs[i].MA.values) for i in (0,1)]
     
@@ -29,7 +29,10 @@ def legacy_contrast(exp_dfs, exp_names, diff_thresh=0.05, null_repeats=10000):
     else:
         print(f"{exp_names[0]} x {exp_names[1]} - Computing positive contrast.")
         s = [list(range(exp_dfs[i].shape[0])) for i in (0,1)]
-        mask = fx1 > 0
+        if masking == True:
+            mask = fx1 > 0
+        else:
+            mask = prior
         if mask.sum() > 0:
             ale_diff = compute_ale_diff(s, ma, mask)
             masked_ma = 1 - np.vstack((ma[0][:,mask], ma[1][:,mask]))
@@ -44,7 +47,10 @@ def legacy_contrast(exp_dfs, exp_names, diff_thresh=0.05, null_repeats=10000):
 
         print(f"{exp_names[0]} x {exp_names[1]} - Computing negative contrast.")
         s = [list(range(exp_dfs[i].shape[0])) for i in (1,0)]
-        mask = fx2 > 0
+        if masking == True:
+            mask = fx2 > 0
+        else:
+            mask = prior
         if mask.sum() > 0:
             ale_diff = compute_ale_diff(s, ma, mask)
             masked_ma = 1 - np.vstack((ma[1][:,mask], ma[0][:,mask]))

@@ -161,7 +161,7 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
     # Cluster level threshold
     null_max_cluster = compute_cluster(null_z, thresh, sample_space)
     if tfce:
-        tfce = compute_tfce(null_z, sample_space)
+        tfce = compute_tfce(null_z)
         # TFCE threshold
         null_max_tfce = np.max(tfce)
         return null_max_ale, null_max_cluster, null_max_tfce

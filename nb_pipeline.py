@@ -27,7 +27,7 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, diff_repeats=1000):
+def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000):
     os.chdir(path)
     
     for row_idx in range(meta_df.shape[0]):
@@ -97,7 +97,7 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
                 exp_dfs = [exp_all.loc[exp_idxs[0]].reset_index(drop=True), exp_all.loc[exp_idxs[1]].reset_index(drop=True)]
 
-                legacy_contrast(exp_dfs, exp_names, diff_thresh=diff_thresh, null_repeats=null_repeats)
+                legacy_contrast(exp_dfs, exp_names, diff_thresh=diff_thresh, null_repeats=null_repeats, masking=masking)
 
                 if len(masks) > 0:
                     print(f"{exp_names[0]} x {exp_names[1]} - ROI analysis")
