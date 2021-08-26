@@ -88,7 +88,7 @@ def compute_z(ale, hx_conv, step):
     return z
 
 
-def compute_tfce(z, sample_space):
+def compute_tfce(z):
     
     if z.shape != shape:
         tmp = np.zeros(shape)
@@ -103,7 +103,7 @@ def compute_tfce(z, sample_space):
     
     tmp = np.zeros(z.shape)
     # calculate tfce values using the parallelized function
-    vals, masks = zip(*Parallel(n_jobs=-1)
+    vals, masks = zip(*Parallel(n_jobs=4)
                      (delayed(tfce_par)(invol=z, h=h, dh=delta_t) for h in np.arange(0, np.max(z), delta_t)))
     # Parallelization makes it necessary to integrate the results afterwards
     # Each repition creats it's own mask and an amount of values corresponding to that mask

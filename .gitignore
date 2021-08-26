@@ -17,3 +17,5 @@ simon_func_mni_2019_Feb_19.txt
 simon_func_mni_2021-April.txt
 simulation_data.hdf5
 tfce_test.npz
+null_cuts.npy 
+simulation*
