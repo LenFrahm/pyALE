@@ -27,7 +27,7 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000):
+def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000):
     os.chdir(path)
     
     for row_idx in range(meta_df.shape[0]):
@@ -43,8 +43,8 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(exp_idxs) >= 12: 
                 print(f'{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment')
-                main_effect(exp_df, exp_name, cluster_thresh=0.001, null_repeats=null_repeats)
-                contribution(exp_df, exp_name, exp_idxs, tasks)
+                main_effect(exp_df, exp_name, tfce_enabled=tfce_enabled, cluster_thresh=0.001, null_repeats=null_repeats)
+                contribution(exp_df, exp_name, exp_idxs, tasks, tfce_enabled)
             else:
                 print(f"{exp_name} : only {len(exp_idxs)} experiments - not analyzed!")
 
@@ -84,11 +84,11 @@ def analysis(path, meta_df, exp_all, tasks, null_repeats=5000, cluster_thresh=0.
 
             if len(exp_idxs[0]) >= 12 and len(exp_idxs[1]) >= 12:
                 if not isfile(f"Results/MainEffect/Full/Volumes/Corrected/{exp_names[0]}_cFWE05.nii"):
-                    main_effect(exp_dfs[0], exp_names[0], null_repeats = null_repeats)
-                    contribution(exp_dfs[0], exp_names[0], exp_idxs[0], tasks)
+                    main_effect(exp_dfs[0], exp_names[0], tfce_enabled=tfce_enabled, null_repeats = null_repeats)
+                    contribution(exp_dfs[0], exp_names[0], exp_idxs[0], tasks, tfce_enabled=tfce_enabled)
                 if not isfile(f"Results/MainEffect/Full/Volumes/Corrected/{exp_names[1]}_cFWE05.nii"):
-                    main_effect(exp_dfs[1], exp_names[1], null_repeats = null_repeats)
-                    contribution(exp_dfs[1], exp_names[1], exp_idxs[1], tasks)
+                    main_effect(exp_dfs[1], exp_names[1], tfce_enabled=tfce_enabled, null_repeats = null_repeats)
+                    contribution(exp_dfs[1], exp_names[1], exp_idxs[1], tasks, tfce_enabled=tfce_enabled)
 
                 for i in reversed(exp_idxs[0]):
                     if i in exp_idxs[1]:

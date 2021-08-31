@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from utils.template import sample_space
 from utils.compute import *
      
-def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
+def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
     # Declare variables for future calculations
     # simple list containing numbers 0 to number of studies -1 for iteration over studies
     s0 = list(range(exp_df.shape[0]))
@@ -100,26 +100,32 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
 
         """ TFCE calculation """
 
-        if isfile(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii'):
+        if isfile(f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii'):
             print(f'{exp_name} - loading p-values & TFCE')
             z = nb.load(f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii').get_fdata()
-            tfce = nb.load(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii').get_fdata()   
+
             
         else:
             print(f'{exp_name} - computing p-values & TFCE')
             z = compute_z(ale, hx_conv, step)
-            tfce = compute_tfce(z, sample_space)
-
             z = plot_and_save(z, nii_folder=f'Results/MainEffect/Full/Volumes/Z/{exp_name}.nii') 
-            tfce = plot_and_save(tfce, img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}.png',
+        if tfce_enabled == True:
+            if isfile(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii'):
+                tfce = nb.load(f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii').get_fdata() 
+            else:
+                tfce = compute_tfce(z)
+                tfce = plot_and_save(tfce, img_folder=f'Results/MainEffect/Full/Images/TFCE/{exp_name}.png',
                                        nii_folder=f'Results/MainEffect/Full/Volumes/TFCE/{exp_name}.nii')
+
+            
+           
 
         """ Null distribution calculation """
 
         if isfile(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle"):
             print(f'{exp_name} - loading null')
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
-                max_ale, max_cluster, max_tfce = pickle.load(f)            
+                    max_ale, max_cluster, max_tfce = pickle.load(f)  
         else:
             print(f'{exp_name} - simulating null')       
             # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
@@ -130,7 +136,7 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
                                                                                                              num_peaks = exp_df.Peaks,
                                                                                                              kernels = exp_df.Kernels,
                                                                                                              hx_conv = hx_conv,
-                                                                                                             tfce=1) for i in range(null_repeats)))
+                                                                                                             tfce_enabled=tfce_enabled) for i in range(null_repeats)))
                     # save simulation results to pickle
             simulation_pickle = (max_ale, max_cluster, max_tfce)
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
@@ -155,11 +161,12 @@ def main_effect(exp_df, exp_name, bin_steps=0.0001, cluster_thresh=0.001, null_r
             print(f"Min p-value for cFWE:{sum(max_cluster>max_clust)/len(max_cluster)}")
 
             # tfce error correction
-            cut_tfce = np.percentile(max_tfce, 95)
-            tfce = tfce*(tfce>cut_tfce)
-            tfce = plot_and_save(tfce, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_TFCE05.png",
-                                       nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_TFCE05.nii")
-            print(f"Min p-value for TFCE:{sum(max_tfce>np.max(tfce))/len(max_tfce)}")
+            if tfce_enabled:
+                cut_tfce = np.percentile(max_tfce, 95)
+                tfce = tfce*(tfce>cut_tfce)
+                tfce = plot_and_save(tfce, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_TFCE05.png",
+                                           nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_TFCE05.nii")
+                print(f"Min p-value for TFCE:{sum(max_tfce>np.max(tfce))/len(max_tfce)}")
 
         else:
             pass

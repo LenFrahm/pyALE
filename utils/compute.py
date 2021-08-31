@@ -144,7 +144,7 @@ def compute_null_ale(s0, sample_space, num_peaks, kernels):
     
     
 def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thresh=0.001, target_n=None,
-                          hx_conv=None, bin_edges=None, bin_centers=None, tfce=None):
+                          hx_conv=None, bin_edges=None, bin_centers=None, tfce_enabled=True):
     if target_n:
         s0 = np.random.permutation(s0)
         s0 = s0[:target_n]
@@ -160,13 +160,13 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
     null_z = compute_z(null_ale, hx_conv, step)
     # Cluster level threshold
     null_max_cluster = compute_cluster(null_z, thresh, sample_space)
-    if tfce:
+    if tfce_enabled:
         tfce = compute_tfce(null_z)
         # TFCE threshold
         null_max_tfce = np.max(tfce)
         return null_max_ale, null_max_cluster, null_max_tfce
         
-    return null_max_ale, null_max_cluster
+    return null_max_ale, null_max_cluster, None
 
 """ CV/Subsampling ALE Computations """
 

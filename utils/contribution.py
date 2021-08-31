@@ -7,13 +7,18 @@ from utils.kernel import kernel_conv
 from utils.template import shape, pad_shape, prior, affine
 
 
-def contribution(exp_df, exp_name, exp_idxs, tasks):
+def contribution(exp_df, exp_name, exp_idxs, tasks, tfce_enabled=True):
     
     cwd = os.getcwd()
     s0 = list(range(exp_df.shape[0]))
     ma = np.stack(exp_df.MA.values)
     
-    for corr_method in ["TFCE", "FWE", "cFWE"]:
+    if tfce_enabled:
+        corr_methods = ["TFCE", "FWE", "cFWE"]
+    else:
+        corr_methods = ["FWE", "cFWE"]
+    
+    for corr_method in corr_methods:
         txt = open(f"{cwd}/Results/MainEffect/Full/Contribution/{exp_name}_{corr_method}.txt", "w+")
         txt.write(f"\nStarting with {exp_name}! \n")
         txt.write(f"\n{exp_name}: {len(s0)} experiments; {exp_df.Subjects.sum()} unique subjects (average of {exp_df.Subjects.mean():.1f} per experiment) \n")
