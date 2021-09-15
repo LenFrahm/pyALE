@@ -19,3 +19,4 @@ simulation_data.hdf5
 tfce_test.npz
 null_cuts.npy 
 simulation*
+tests/
