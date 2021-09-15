@@ -19,4 +19,8 @@ simulation_data.hdf5
 tfce_test.npz
 null_cuts.npy 
 simulation*
+<<<<<<< HEAD
 excel_templates/
+=======
+tests/
+>>>>>>> b7272c3cc8263be9e7b345be7a555928721a1f91
