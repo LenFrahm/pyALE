@@ -21,3 +21,4 @@ null_cuts.npy
 simulation*
 excel_templates/
 tests/
+unittests.ipynb
