@@ -20,3 +20,4 @@ tfce_test.npz
 null_cuts.npy 
 simulation*
 tests/
+unittests.ipynb

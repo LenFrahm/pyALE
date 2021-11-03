@@ -7,7 +7,6 @@ from utils.kernel import kernel_calc, kernel_conv
 from utils.tal2icbm_spm import tal2icbm_spm
 from utils.template import shape, affine
 
-
 def read_exp_info(filename):
 
     df = pd.read_excel(filename, engine='openpyxl')
