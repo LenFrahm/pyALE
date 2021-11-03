@@ -10,7 +10,7 @@ from analysis.roi import check_rois
 from utils.compile_studies import compile_studies
 from utils.contribution import contribution
 from utils.folder_setup import folder_setup
-from utils.read_exp_info import read_exp_info
+from utils.read_exp_info import create_exp_df, create_task_df
 
 def setup(path, analysis_info_name, experiment_info_name):
     os.chdir(path)
@@ -23,7 +23,8 @@ def setup(path, analysis_info_name, experiment_info_name):
         with open(f'Results/{experiment_info_name}.pickle', 'rb') as f:
             exp_all, tasks = pickle.load(f)
     else:
-        exp_all, tasks = read_exp_info(f'{experiment_info_name}')
+        exp_all = create_exp_df(f'{experiment_info_name}')
+        tasks = create_task_df(exp_all)
         
     return meta_df, exp_all, tasks
 

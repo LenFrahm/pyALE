@@ -7,6 +7,7 @@ def compile_studies(conditions, tasks):
     not_to_use = []
     masks = []
     mask_names = []
+
     for condition in conditions:
         operation = condition[0]
 

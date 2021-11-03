@@ -11,7 +11,7 @@ from analysis.roi import check_rois
 from utils.compile_studies import compile_studies
 from utils.contribution import contribution
 from utils.folder_setup import folder_setup
-from utils.read_exp_info import read_exp_info
+from utils.read_exp_info import create_exp_df, create_task_df
 
 if __name__ == '__main__':
 
@@ -72,12 +72,13 @@ if __name__ == '__main__':
 
     if not isdir("Results"):
         os.mkdir("Results")
-
+    
     if isfile(f'Results/{file}.pickle'):
         with open(f'Results/{file}.pickle', 'rb') as f:
             exp_all, tasks = pickle.load(f)
     else:
-        exp_all, tasks = read_exp_info(f'{file}')
+        exp_all = create_exp_df(f'{file}.xlsx')
+        tasks = create_task_df(exp_all, file)
 
     if type_ == "M":
         if not isdir("Results/MainEffect/Full"):
