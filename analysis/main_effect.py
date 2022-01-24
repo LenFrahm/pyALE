@@ -5,7 +5,7 @@ import numpy as np
 import nibabel as nb
 import pickle
 from joblib import Parallel, delayed
-from utils.template import sample_space
+from utils.template import sample_space, prior
 from utils.compute import *
      
 def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
@@ -93,6 +93,7 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
         else:
             print(f'{exp_name} - computing ALE and null PDF')
             ale = compute_ale(ma)
+            ale[prior == 0] = 0
             ale = plot_and_save(ale, img_folder=f'Results/MainEffect/Full/Images/ALE/{exp_name}.png',
                                      nii_folder=f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii')
             
