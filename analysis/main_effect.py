@@ -39,7 +39,7 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
                 cut_cluster = pickle.load(f)
         else:            
             print(f"{exp_name} - computing cv cluster cut-off.")
-            max_ale, max_cluster = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
+            max_ale, max_cluster, _ = zip(*Parallel(n_jobs=4, verbose=5)(delayed(compute_null_cutoffs)(s0 = s0,
                                                                                                     sample_space = sample_space,
                                                                                                     num_peaks = exp_df.Peaks,
                                                                                                     kernels = exp_df.Kernels,
@@ -47,7 +47,8 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
                                                                                                     thresh = cluster_thresh,
                                                                                                     bin_centers=bin_centers,
                                                                                                     bin_edges=bin_edges,
-                                                                                                    target_n=target_n) for i in range(null_repeats)))
+                                                                                                    target_n=target_n,
+                                                                                                    tfce_enabled=False) for i in range(null_repeats)))
             cut_cluster = np.percentile(max_cluster, 95)
             with open(f"Results/MainEffect/CV/NullDistributions/{exp_name}_ccut_{target_n}.pickle", "wb") as f:
                 pickle.dump(cut_cluster, f)
@@ -55,9 +56,13 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
         if not isfile(f"Results/MainEffect/CV/Volumes/ALE/{exp_name}_{target_n}.nii"):     
             print(f"{exp_name} - computing cv ale.")
             samples = create_samples(s0, sample_n, target_n)
-            sub_ale = Parallel(n_jobs=8, verbose=2)(delayed(compute_sub_ale)(samples[i], ma, hx, bin_centers, cut_cluster, thresh=cluster_thresh) for i in range(samples.shape[0]))
-            sub_ale = np.mean(sub_ale, axis=0)
-            sub_ale = plot_and_save(sub_ale, img_folder=f"Results/MainEffect/CV/Images/{exp_name}_{target_n}.png",
+            ale_mean = np.zeros((91,109,91))
+            for idx, sample in enumerate(samples):
+                if (idx % 500) == 0:
+                    print(f'Calculated {idx} subsample ALEs')
+                ale_mean += compute_sub_ale(sample, ma, hx, bin_centers, cut_cluster, thresh=cluster_thresh)
+            ale_mean = ale_mean/ len(samples)
+            ale_mean = plot_and_save(ale_mean, img_folder=f"Results/MainEffect/CV/Images/{exp_name}_{target_n}.png",
                                              nii_folder=f"Results/MainEffect/CV/Volumes/{exp_name}_{target_n}.nii")
         
         print(f"{exp_name} - probabilistic ALE done!")

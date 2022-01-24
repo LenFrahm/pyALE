@@ -116,7 +116,7 @@ def compute_tfce(z):
     return tfce
 
 
-def compute_cluster(z, thresh, sample_space=None, cut_cluster=None):    
+def compute_cluster(z, thresh, cut_cluster=None):    
     # disregard all voxels that feature a z-value of lower than some threshold (approx. 3 standard deviations aways from the mean)
     # this serves as a preliminary thresholding
     sig_arr = np.zeros(shape)
@@ -148,6 +148,7 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
     if target_n:
         s0 = np.random.permutation(s0)
         s0 = s0[:target_n]
+        kernels = kernels.loc[s0]
     # compute ALE values based on random peak locations sampled from a give sample_space
     # sample space could be all grey matter or only foci reported in brainmap
     null_ma, null_ale = compute_null_ale(s0, sample_space, num_peaks, kernels)
@@ -159,7 +160,7 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
         hx_conv = compute_hx_conv(null_hx, bin_centers, step)
     null_z = compute_z(null_ale, hx_conv, step)
     # Cluster level threshold
-    null_max_cluster = compute_cluster(null_z, thresh, sample_space)
+    null_max_cluster = compute_cluster(null_z, thresh)
     if tfce_enabled:
         tfce = compute_tfce(null_z)
         # TFCE threshold
@@ -192,10 +193,10 @@ def create_samples(s0, sample_n, target_n):
 
 
 def compute_sub_ale(sample, ma, hx, bin_centers, cut_cluster, step=10000, thresh=0.001):
-    hx_conv = compute_hx_conv(sample, hx, bin_centers, step)
+    hx_conv = compute_hx_conv(hx, bin_centers, step)
     ale = compute_ale(ma[sample])
     z = compute_z(ale, hx_conv, step)
-    z, max_cluster = compute_cluster(z, thresh, sample_space=None, cut_cluster=cut_cluster)
+    z, max_cluster = compute_cluster(z, thresh, cut_cluster=cut_cluster)
     z[z > 0] = 1
     return z
 
