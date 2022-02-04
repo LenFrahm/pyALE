@@ -124,7 +124,9 @@ def compute_cluster(z, thresh, cut_cluster=None):
     # find clusters of significant z-values
     labels, cluster_count = ndimage.label(sig_arr)
     # save number of voxels in biggest cluster
-    max_clust = np.max(np.bincount(labels[labels>0]))
+    max_clust = 0
+    if cluster_count >= 1:
+        max_clust = np.max(np.bincount(labels[labels>0]))
     if cut_cluster is not None:
         # check significance of cluster against the 95th percentile of the null distribution cluster size
         sig_clust = np.where(np.bincount(labels[labels > 0]) > cut_cluster)[0]
