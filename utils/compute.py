@@ -84,6 +84,7 @@ def compute_z(ale, hx_conv, step):
     p[p < EPS] = EPS
     # calculate z-values by plugging 1-p into a probability density function
     z = norm.ppf(1-p)
+    z[z < 0] = 0
     
     return z
 
