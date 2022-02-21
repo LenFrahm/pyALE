@@ -43,7 +43,7 @@ def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(exp_idxs) >= 12: 
                 print(f'{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment')
-                main_effect(exp_df, exp_name, tfce_enabled=tfce_enabled, cluster_thresh=0.001, null_repeats=null_repeats)
+                main_effect(exp_df, exp_name, tfce_enabled=tfce_enabled, cluster_thresh=cluster_thresh, null_repeats=null_repeats)
                 contribution(exp_df, exp_name, exp_idxs, tasks, tfce_enabled)
             else:
                 print(f"{exp_name} : only {len(exp_idxs)} experiments - not analyzed!")
