@@ -84,7 +84,7 @@ def compute_z(ale, hx_conv, step):
     p[p < EPS] = EPS
     # calculate z-values by plugging 1-p into a probability density function
     z = norm.ppf(1-p)
-    #z[z < 0] = 0
+    z[z < 0] = 0
     
     return z
 
@@ -268,7 +268,7 @@ def plot_and_save(arr, img_folder=None, nii_folder=None):
     # Function that takes brain array and transforms it to NIFTI1 format
     # Saves it both as a statmap png and as a Nifti file
     arr_masked = arr
-    #arr_masked[prior == 0] = 0
+    arr_masked[prior == 0] = 0
     nii_img = nb.Nifti1Image(arr_masked, affine)
     if img_folder:
         plotting.plot_stat_map(nii_img, output_file=img_folder)
