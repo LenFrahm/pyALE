@@ -84,7 +84,7 @@ def compute_z(ale, hx_conv, step):
     p[p < EPS] = EPS
     # calculate z-values by plugging 1-p into a probability density function
     z = norm.ppf(1-p)
-    z[z < 0] = 0
+    #z[z < 0] = 0
     
     return z
 
@@ -117,11 +117,11 @@ def compute_tfce(z):
     return tfce
 
 
-def compute_cluster(z, thresh, cut_cluster=None):    
+def compute_cluster(z, cluster_thresh, cut_cluster=None):    
     # disregard all voxels that feature a z-value of lower than some threshold (approx. 3 standard deviations aways from the mean)
     # this serves as a preliminary thresholding
     sig_arr = np.zeros(shape)
-    sig_arr[z > norm.ppf(1-thresh)] = 1
+    sig_arr[z > norm.ppf(1-cluster_thresh)] = 1
     # find clusters of significant z-values
     labels, cluster_count = ndimage.label(sig_arr)
     # save number of voxels in biggest cluster
@@ -146,7 +146,7 @@ def compute_null_ale(s0, sample_space, num_peaks, kernels):
     return null_ma, null_ale
     
     
-def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thresh=0.001, target_n=None,
+def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, cluster_thresh=0.001, target_n=None,
                           hx_conv=None, bin_edges=None, bin_centers=None, tfce_enabled=True):
     if target_n:
         s0 = np.random.permutation(s0)
@@ -163,7 +163,7 @@ def compute_null_cutoffs(s0, sample_space, num_peaks, kernels, step=10000, thres
         hx_conv = compute_hx_conv(null_hx, bin_centers, step)
     null_z = compute_z(null_ale, hx_conv, step)
     # Cluster level threshold
-    null_max_cluster = compute_cluster(null_z, thresh)
+    null_max_cluster = compute_cluster(null_z, cluster_thresh)
     if tfce_enabled:
         tfce = compute_tfce(null_z)
         # TFCE threshold
@@ -267,7 +267,9 @@ def compute_sig_diff(fx, mask, ale_diff, perm_diff, null_repeats, diff_thresh):
 def plot_and_save(arr, img_folder=None, nii_folder=None):
     # Function that takes brain array and transforms it to NIFTI1 format
     # Saves it both as a statmap png and as a Nifti file
-    nii_img = nb.Nifti1Image(arr, affine)
+    arr_masked = arr
+    #arr_masked[prior == 0] = 0
+    nii_img = nb.Nifti1Image(arr_masked, affine)
     if img_folder:
         plotting.plot_stat_map(nii_img, output_file=img_folder)
     if nii_folder:

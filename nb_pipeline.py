@@ -27,7 +27,7 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000):
+def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000, nprocesses=4):
     os.chdir(path)
     
     for row_idx in range(meta_df.shape[0]):
@@ -43,7 +43,7 @@ def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(exp_idxs) >= 12: 
                 print(f'{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment')
-                main_effect(exp_df, exp_name, tfce_enabled=tfce_enabled, cluster_thresh=cluster_thresh, null_repeats=null_repeats)
+                main_effect(exp_df, exp_name, tfce_enabled=tfce_enabled, cluster_thresh=cluster_thresh, null_repeats=null_repeats, nprocesses=nprocesses)
                 contribution(exp_df, exp_name, exp_idxs, tasks, tfce_enabled)
             else:
                 print(f"{exp_name} : only {len(exp_idxs)} experiments - not analyzed!")
@@ -66,7 +66,7 @@ def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
             if len(meta_df.iloc[row_idx, 0]) > 1:
                 target_n = int(meta_df.iloc[row_idx, 0][1:])
-                main_effect(exp_df, exp_name, null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
+                main_effect(exp_df, exp_name, null_repeats=null_repeats, target_n=target_n, sample_n=sample_n, nprocesses=nprocesses)
             else:
                 print(f"{exp_name}: need to specify subsampling")
                 continue

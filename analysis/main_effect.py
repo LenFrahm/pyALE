@@ -8,7 +8,7 @@ from joblib import Parallel, delayed
 from utils.template import sample_space, prior
 from utils.compute import *
      
-def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None):
+def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None, nprocesses=4):
     # Declare variables for future calculations
     # simple list containing numbers 0 to number of studies -1 for iteration over studies
     s0 = list(range(exp_df.shape[0]))
@@ -39,7 +39,7 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
                 cut_cluster = pickle.load(f)
         else:            
             print(f"{exp_name} - computing cv cluster cut-off.")
-            max_ale, max_cluster, _ = zip(*Parallel(n_jobs=4, verbose=5)(delayed(compute_null_cutoffs)(s0 = s0,
+            max_ale, max_cluster, _ = zip(*Parallel(n_jobs=nprocesses, verbose=5)(delayed(compute_null_cutoffs)(s0 = s0,
                                                                                                     sample_space = sample_space,
                                                                                                     num_peaks = exp_df.Peaks,
                                                                                                     kernels = exp_df.Kernels,
@@ -93,7 +93,6 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
         else:
             print(f'{exp_name} - computing ALE and null PDF')
             ale = compute_ale(ma)
-            ale[prior == 0] = 0
             ale = plot_and_save(ale, img_folder=f'Results/MainEffect/Full/Images/ALE/{exp_name}.png',
                                      nii_folder=f'Results/MainEffect/Full/Volumes/ALE/{exp_name}.nii')
             
@@ -137,11 +136,12 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
             # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
             # peaks are randomly distributed in the sample space. Then calculate all metrics that have
             # been calculated for the 'actual' data to create a null distribution unde the assumption of indipendence of results
-            max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=-1, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
+            max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
                                                                                                              sample_space = sample_space,
                                                                                                              num_peaks = exp_df.Peaks,
                                                                                                              kernels = exp_df.Kernels,
                                                                                                              hx_conv = hx_conv,
+                                                                                                             cluster_thresh=cluster_thresh,
                                                                                                              tfce_enabled=tfce_enabled) for i in range(null_repeats)))
                     # save simulation results to pickle
             simulation_pickle = (max_ale, max_cluster, max_tfce)
@@ -161,7 +161,7 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
 
             # cluster wise family wise error correction
             cut_cluster = np.percentile(max_cluster, 95)                  
-            z, max_clust = compute_cluster(z, thresh=cluster_thresh, cut_cluster=cut_cluster)
+            z, max_clust = compute_cluster(z, cluster_thresh=cluster_thresh, cut_cluster=cut_cluster)
             z = plot_and_save(z, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_cFWE05.png",
                                  nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_cFWE05.nii")
             print(f"Min p-value for cFWE:{sum(max_cluster>max_clust)/len(max_cluster)}")
