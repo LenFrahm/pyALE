@@ -44,7 +44,7 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
                                                                                                     num_peaks = exp_df.Peaks,
                                                                                                     kernels = exp_df.Kernels,
                                                                                                     step=step,
-                                                                                                    thresh = cluster_thresh,
+                                                                                                    cluster_thresh=cluster_thresh,
                                                                                                     bin_centers=bin_centers,
                                                                                                     bin_edges=bin_edges,
                                                                                                     target_n=target_n,
