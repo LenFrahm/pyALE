@@ -72,7 +72,7 @@ nilearn==0.7.1
 notebook==6.4.10
 numba==0.53.1
 numba-scipy==0.3.0
-numpy==1.21.0
+numpy==1.22.0
 openpyxl==3.0.7
 packaging==20.9
 pandas==1.2.3
