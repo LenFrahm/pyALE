@@ -69,7 +69,7 @@ nbformat==5.1.2
 nest-asyncio==1.5.1
 nibabel==3.2.1
 nilearn==0.7.1
-notebook==6.4.10
+notebook==6.4.12
 numba==0.53.1
 numba-scipy==0.3.0
 numpy==1.22.0
