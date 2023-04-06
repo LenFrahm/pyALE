@@ -225,7 +225,7 @@ def compute_null_diff(s, prior, exp_dfs, target_n=None, diff_repeats=1000):
     null_ma = []
     for xi in (0,1):
         null_peaks = np.array([prior_idxs[np.random.randint(0, prior_idxs.shape[0], exp_dfs[xi].Peaks[i]), :] for i in s[xi]], dtype=object)
-        null_ma.append(compute_ma(s[xi], null_peaks, exp_dfs[xi].Kernels))
+        null_ma.append(compute_ma(null_peaks, exp_dfs[xi].Kernels))
     
     if target_n:
         p_diff = Parallel(n_jobs=4, verbose=1)(delayed(compute_ale_diff)(s, null_ma, prior, target_n) for i in range(diff_repeats))
