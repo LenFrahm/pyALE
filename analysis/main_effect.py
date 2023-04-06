@@ -24,6 +24,10 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
     
     peaks = np.array([exp_df.XYZ[i].T for i in s0], dtype=object)
     
+    nfoci = [exp_peaks.shape[0] for exp_peaks in peaks]
+    print_df = pd.DataFrame([exp_df.Author.values, nfoci]).transpose()
+    print_df.columns = ['Experiment','Number of Foci']
+    print_df.to_csv(f'Results/MainEffect/{exp_name}_included_experiments.csv', index=None, mode='w', sep='\t')
     
     ma = np.array([exp_df.MA.values[i] for i in s0])
     hx = compute_hx(ma, bin_edges)
