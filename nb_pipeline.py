@@ -117,17 +117,15 @@ def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000
             exp_dfs = [exp_all.loc[exp_idxs[0]].reset_index(drop=True), exp_all.loc[exp_idxs[1]].reset_index(drop=True)]
             n = [len(exp_idxs[0]), len(exp_idxs[1])]
 
-            if np.min(n) >= 19:
+            if len(meta_df.iloc[row_idx, 0]) > 1:
+                target_n = int(meta_df.iloc[row_idx, 0][1:])
 
-                if len(meta_df.iloc[row_idx, 0]) > 1:
-                    target_n = int(meta_df.iloc[row_idx, 0][1:])
+            else:
+                target_n = int(min(np.floor(np.mean((np.min(n), 17))), np.min(n)-2))
 
-                else:
-                    target_n = int(min(np.floor(np.mean((np.min(n), 17))), np.min(n)-2))
+            if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[0]}_{target_n}.nii'):
+                main_effect(exp_dfs[0], exp_names[0], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
+            if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[1]}_{target_n}.nii'):
+                main_effect(exp_dfs[1], exp_names[1], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
 
-                if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[0]}_{target_n}.nii'):
-                    main_effect(exp_dfs[0], exp_names[0], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
-                if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[1]}_{target_n}.nii'):
-                    main_effect(exp_dfs[1], exp_names[1], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
-
-                contrast(exp_dfs, exp_names, null_repeats=null_repeats, target_n=target_n, diff_repeats=diff_repeats)
+            contrast(exp_dfs, exp_names, null_repeats=null_repeats, target_n=target_n, diff_repeats=diff_repeats)
