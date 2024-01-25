@@ -10,7 +10,7 @@ from utils.template import prior, affine, shape, pad_shape, sample_space
 from utils.compute import plot_and_save, compute_ale_diff, compute_null_diff
 
 
-def contrast(exp_dfs, exp_names, null_repeats=1000, target_n="Full", diff_repeats=1000):
+def contrast(exp_dfs, exp_names, null_repeats=1000, target_n="Full", diff_repeats=1000, nprocesses=2):
     
     s = [list(range(exp_dfs[i].shape[0])) for i in (0,1)]   
     ma = [np.stack(exp_dfs[i].MA.values) for i in (0,1)]
@@ -36,16 +36,17 @@ def contrast(exp_dfs, exp_names, null_repeats=1000, target_n="Full", diff_repeat
             r_diff, prior, min_diff, max_diff = pickle.load(f)
     else:
         print(f'{exp_names[0]} x {exp_names[1]} - computing actual diff and null extremes')
-        prior = (fx1 + fx2) > 0.05
+        prior = np.zeros((91,109,91)).astype(bool)
+        prior[tuple(sample_space)] = 1
         
         if cat == "Balanced":
-            r_diff = Parallel(n_jobs=8, verbose=1)(delayed(compute_ale_diff)(s, ma, prior, target_n) for i in range(diff_repeats))
+            r_diff = Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_ale_diff)(s, ma, prior, target_n) for i in range(diff_repeats))
             r_diff = np.mean(r_diff, axis=0)   
-            min_diff, max_diff = zip(*Parallel(n_jobs=4, verbose=1)(delayed(compute_null_diff)(s, prior, exp_dfs, target_n, diff_repeats) for i in range(null_repeats)))
+            min_diff, max_diff = zip(*Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_null_diff)(s, prior, exp_dfs, target_n, diff_repeats) for i in range(null_repeats)))
 
         else:
             r_diff = compute_diff(s, ma, prior)
-            min_diff, max_diff = zip(*Parallel(n_jobs=4, verbose=1)(delayed(compute_null_diff)(s, prior, exp_dfs) for i in range(null_repeats)))
+            min_diff, max_diff = zip(*Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_null_diff)(s, prior, exp_dfs) for i in range(null_repeats)))
         
         pickle_object = (r_diff, prior, min_diff, max_diff)
         with open(f"Results/Contrast/{cat}/NullDistributions/{exp_names[0]}_x_{exp_names[1]}_{target_n}.pickle", "wb") as f:

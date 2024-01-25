@@ -208,7 +208,7 @@ def compute_sub_ale(sample, ma, hx, bin_centers, cut_cluster, step=10000, thresh
 
 
 def compute_ale_diff(s, ma_maps, prior, target_n=None):
-    ale = np.zeros((2,prior.sum()))      
+    ale = np.zeros((2,int(prior.sum())))      
     for xi in (0,1):
         if target_n:  
             s_perm = np.random.permutation(s[xi])

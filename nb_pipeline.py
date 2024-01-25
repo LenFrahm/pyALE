@@ -128,4 +128,4 @@ def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000
             if not isfile(f'Results/MainEffect/CV/Volumes/{exp_names[1]}_{target_n}.nii'):
                 main_effect(exp_dfs[1], exp_names[1], null_repeats=null_repeats, target_n=target_n, sample_n=sample_n)
 
-            contrast(exp_dfs, exp_names, null_repeats=null_repeats, target_n=target_n, diff_repeats=diff_repeats)
+            contrast(exp_dfs, exp_names, null_repeats=null_repeats, target_n=target_n, diff_repeats=diff_repeats, nprocesses=nprocesses)
