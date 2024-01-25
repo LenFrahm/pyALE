@@ -27,7 +27,7 @@ def setup(path, analysis_info_name, experiment_info_name):
         
     return meta_df, exp_all, tasks
 
-def analysis(path, meta_df, exp_all, tasks, tfce_enabled=True, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=True, diff_repeats=1000, nprocesses=4):
+def analysis(path, meta_df, exp_all, tasks, tfce_enabled=False, null_repeats=5000, cluster_thresh=0.001, sample_n=2500, diff_thresh=0.05, masking=False, diff_repeats=1000, nprocesses=4):
     os.chdir(path)
     
     for row_idx in range(meta_df.shape[0]):
