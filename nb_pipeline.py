@@ -56,7 +56,7 @@ def analysis(
             conditions = meta_df.iloc[row_idx, 2:].dropna().to_list()
             exp_idxs, masks, mask_names = compile_studies(conditions, tasks)
             exp_df = exp_all.loc[exp_idxs].reset_index(drop=True)
-            if len(exp_idxs) >= 10:
+            if len(exp_idxs) >= 5:
                 print(
                     f"{exp_name} : {len(exp_idxs)} experiments; average of {exp_df.Subjects.mean():.2f} subjects per experiment"
                 )
@@ -129,7 +129,7 @@ def analysis(
                 exp_all.loc[exp_idxs[1]].reset_index(drop=True),
             ]
 
-            if len(exp_idxs[0]) >= 12 and len(exp_idxs[1]) >= 12:
+            if len(exp_idxs[0]) >= 5 and len(exp_idxs[1]) >= 5:
                 if not isfile(
                     f"Results/MainEffect/Full/Volumes/Corrected/{exp_names[0]}_cFWE05.nii"
                 ):
