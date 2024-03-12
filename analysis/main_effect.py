@@ -7,8 +7,9 @@ import pickle
 from joblib import Parallel, delayed
 from utils.template import sample_space, prior
 from utils.compute import *
+from utils.cutoff_predict import predict_cutoff
      
-def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None, nprocesses=4):
+def main_effect(exp_df, exp_name, tfce_enabled=True, cutoff_predict_enabled=True, bin_steps=0.0001, cluster_thresh=0.001, null_repeats=5000, target_n=None, sample_n=None, nprocesses=4):
     # Declare variables for future calculations
     # simple list containing numbers 0 to number of studies -1 for iteration over studies
     s0 = list(range(exp_df.shape[0]))
@@ -38,24 +39,25 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
         print(f"{exp_name} - entering probabilistic ALE routine.")
         
         if isfile(f"Results/MainEffect/CV/NullDistributions/{exp_name}_ccut_{target_n}.pickle"):
-            print(f"{exp_name} - computing cv cluster cut-off.")
+            print(f"{exp_name} - loading probabilistic cfwe cut-off.")
             with open(f"Results/MainEffect/CV/NullDistributions/{exp_name}_ccut_{target_n}.pickle", 'rb') as f:
-                cut_cluster = pickle.load(f)
+                cut_cfwe = pickle.load(f)
         else:            
             print(f"{exp_name} - computing cv cluster cut-off.")
-            max_ale, max_cluster, _ = zip(*Parallel(n_jobs=nprocesses, verbose=5)(delayed(compute_null_cutoffs)(s0 = s0,
-                                                                                                    sample_space = sample_space,
-                                                                                                    num_peaks = exp_df.Peaks,
-                                                                                                    kernels = exp_df.Kernels,
-                                                                                                    step=step,
-                                                                                                    cluster_thresh=cluster_thresh,
-                                                                                                    bin_centers=bin_centers,
-                                                                                                    bin_edges=bin_edges,
-                                                                                                    target_n=target_n,
-                                                                                                    tfce_enabled=False) for i in range(null_repeats)))
-            cut_cluster = np.percentile(max_cluster, 95)
+            if cutoff_predict_enabled == False:
+                _, max_cluster, _ = zip(*Parallel(n_jobs=nprocesses, verbose=5)(delayed(compute_null_cutoffs)(s0 = s0,
+                                                                                                        sample_space = sample_space,
+                                                                                                        num_peaks = exp_df.Peaks,
+                                                                                                        kernels = exp_df.Kernels,
+                                                                                                        step=step,
+                                                                                                        cluster_thresh=cluster_thresh,
+                                                                                                        bin_centers=bin_centers,
+                                                                                                        bin_edges=bin_edges,
+                                                                                                        target_n=target_n,
+                                                                                                        tfce_enabled=False) for i in range(null_repeats)))
+                cut_cfwe = np.percentile(max_cluster, 95)
             with open(f"Results/MainEffect/CV/NullDistributions/{exp_name}_ccut_{target_n}.pickle", "wb") as f:
-                pickle.dump(cut_cluster, f)
+                pickle.dump(cut_cfwe, f)
         
         if not isfile(f"Results/MainEffect/CV/Volumes/ALE/{exp_name}_{target_n}.nii"):     
             print(f"{exp_name} - computing cv ale.")
@@ -64,8 +66,10 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
             for idx, sample in enumerate(samples):
                 if (idx % 500) == 0:
                     print(f'Calculated {idx} subsample ALEs')
-                ale_mean += compute_sub_ale(sample, ma, hx, bin_centers, cut_cluster, thresh=cluster_thresh)
-            ale_mean = ale_mean/ len(samples)
+                if cutoff_predict_enabled == True:
+                    _, cut_cfwe, _ = predict_cutoff(exp_df.iloc[sample].reset_index(drop=True))
+                ale_mean += compute_sub_ale(sample, ma, hx, bin_centers, cut_cfwe, thresh=cluster_thresh)
+            ale_mean = ale_mean / len(samples)
             ale_mean = plot_and_save(ale_mean, img_folder=f"Results/MainEffect/CV/Images/{exp_name}_{target_n}.png",
                                              nii_folder=f"Results/MainEffect/CV/Volumes/{exp_name}_{target_n}.nii")
         
@@ -134,49 +138,55 @@ def main_effect(exp_df, exp_name, tfce_enabled=True, bin_steps=0.0001, cluster_t
         if isfile(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle"):
             print(f'{exp_name} - loading null')
             with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", 'rb') as f:
-                    max_ale, max_cluster, max_tfce = pickle.load(f)  
+                    max_vfwe, max_cfwe, max_tfce = pickle.load(f) 
+            cut_vfwe = np.percentile(max_vfwe, 95)
+            cut_cfwe = np.percentile(max_cfwe, 95)
+            if None not in max_tfce:
+                cut_tfce = np.percentile(max_tfce, 95)
         else:
             print(f'{exp_name} - simulating null')       
             # Simulate 19 experiments, which have the same amount of peaks as the original meta analysis but the
             # peaks are randomly distributed in the sample space. Then calculate all metrics that have
             # been calculated for the 'actual' data to create a null distribution unde the assumption of indipendence of results
-            max_ale, max_cluster, max_tfce = zip(*Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
-                                                                                                             sample_space = sample_space,
-                                                                                                             num_peaks = exp_df.Peaks,
-                                                                                                             kernels = exp_df.Kernels,
-                                                                                                             hx_conv = hx_conv,
-                                                                                                             cluster_thresh=cluster_thresh,
-                                                                                                             tfce_enabled=tfce_enabled) for i in range(null_repeats)))
-                    # save simulation results to pickle
-            simulation_pickle = (max_ale, max_cluster, max_tfce)
-            with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
-                pickle.dump(simulation_pickle, f)
+            if cutoff_predict_enabled == False:
+                max_vfwe, max_cfwe, max_tfce = zip(*Parallel(n_jobs=nprocesses, verbose=1)(delayed(compute_null_cutoffs)(s0 = s0,
+                                                                                                                 sample_space = sample_space,
+                                                                                                                 num_peaks = exp_df.Peaks,
+                                                                                                                 kernels = exp_df.Kernels,
+                                                                                                                 hx_conv = hx_conv,
+                                                                                                                 cluster_thresh=cluster_thresh,
+                                                                                                                 tfce_enabled=tfce_enabled) for i in range(null_repeats)))
+                        # save simulation results to pickle
+                simulation_pickle = (max_vfwe, max_cfwe, max_tfce)
+                with open(f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle", "wb") as f:
+                    pickle.dump(simulation_pickle, f)
+
+                cut_vfwe = np.percentile(max_vfwe, 95)
+                cut_cfwe = np.percentile(max_cfwe, 95)
+                if None not in max_tfce:
+                    cut_tfce = np.percentile(max_tfce, 95)
+            if cutoff_predict_enabled == True:
+                cut_vfwe, cut_cfwe, cut_tfce = predict_cutoff(exp_df=exp_df)
 
         """ Multiple comparison error correction: FWE, cFWE, TFCE """
 
         if not isfile(f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_TFCE05.nii"):
             print(f'{exp_name} - inference and printing')
             # voxel wise family wise error correction
-            cut_max = np.percentile(max_ale, 95)
-            ale = ale*(ale>cut_max)
+            ale = ale*(ale>cut_vfwe)
             ale = plot_and_save(ale, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_FWE05.png",
                                      nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_FWE05.nii")
-            print(f"Min p-value for FWE:{sum(max_ale>np.max(ale))/len(max_ale)}")
 
-            # cluster wise family wise error correction
-            cut_cluster = np.percentile(max_cluster, 95)                  
-            z, max_clust = compute_cluster(z, cluster_thresh=cluster_thresh, cut_cluster=cut_cluster)
+            # cluster wise family wise error correction        
+            z, max_clust = compute_cluster(z, cluster_thresh=cluster_thresh, cut_cluster=cut_cfwe)
             z = plot_and_save(z, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_cFWE05.png",
                                  nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_cFWE05.nii")
-            print(f"Min p-value for cFWE:{sum(max_cluster>max_clust)/len(max_cluster)}")
 
             # tfce error correction
             if tfce_enabled:
-                cut_tfce = np.percentile(max_tfce, 95)
                 tfce = tfce*(tfce>cut_tfce)
                 tfce = plot_and_save(tfce, img_folder=f"Results/MainEffect/Full/Images/Corrected/{exp_name}_TFCE05.png",
                                            nii_folder=f"Results/MainEffect/Full/Volumes/Corrected/{exp_name}_TFCE05.nii")
-                print(f"Min p-value for TFCE:{sum(max_tfce>np.max(tfce))/len(max_tfce)}")
 
         else:
             pass
