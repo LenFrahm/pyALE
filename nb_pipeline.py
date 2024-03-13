@@ -6,7 +6,7 @@ import pickle
 from analysis.main_effect import main_effect
 from analysis.contrast import contrast
 from analysis.legacy_contrast import legacy_contrast
-from analysis.roi import check_rois
+from analysis.roi import roi_ale, roi_ale_contrast
 from utils.compile_studies import compile_studies
 from utils.contribution import contribution
 from utils.folder_setup import folder_setup
@@ -78,20 +78,14 @@ def analysis(
                 print(f"{exp_name} - ROI analysis")
                 if not isdir("Results/MainEffect/ROI"):
                     folder_setup(path, "MainEffect_ROI")
-                with open(
-                    f"Results/MainEffect/Full/NullDistributions/{exp_name}_null.pickle",
-                    "rb",
-                ) as f:
-                    null_ale, _, _, _ = pickle.load(f)
-                null_ale = np.stack(null_ale)
-                check_rois(
-                    exp_df,
-                    exp_name,
-                    masks,
-                    mask_names,
-                    null_repeats=null_repeats,
-                    null_ale=null_ale,
-                )
+                for idx, mask in enumerate(masks):
+                    roi_ale(
+                        exp_df,
+                        exp_name,
+                        mask,
+                        mask_names[idx],
+                        null_repeats=null_repeats
+                    )
 
         if meta_df.iloc[row_idx, 0][0] == "P":  # Probabilistic ALE
             if not isdir("Results/MainEffect/CV"):
@@ -188,7 +182,7 @@ def analysis(
                     print(f"{exp_names[0]} x {exp_names[1]} - ROI analysis")
                     if not isdir("Results/Contrast/ROI"):
                         folder_setup(path, "Contrast_ROI")
-                    check_rois(
+                    roi_ale_contrast(
                         exp_dfs, exp_names, masks, mask_names, null_repeats=null_repeats
                     )
 

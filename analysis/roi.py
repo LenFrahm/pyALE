@@ -2,34 +2,40 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from utils.compute import compute_ale, compute_perm_diff
+from utils.compute import compute_ma, compute_ale, compute_perm_diff
+from utils.template import sample_space
 from joblib import Parallel, delayed
 
-def roi_ale(exp_df, exp_name, masks, mask_names, null_repeats, null_ale):
-    s0 = list(range(exp_df.shape[0]))
+def roi_ale(exp_df, exp_name, mask, mask_name, null_repeats):
     ma = np.stack(exp_df.MA.values)
     ale = compute_ale(ma)
 
-    for index, mask in enumerate(masks):
-        if np.unique(mask).shape[0] == 2:
-            bench_sum = np.sum(ale[mask])
-            bench_max = np.max(ale[mask])
+    bench_sum = np.sum(ale[mask])
+    bench_max = np.max(ale[mask])
 
-            null_sum = np.sum(null_ale[:,mask], axis=1)
-            null_max = np.max(null_ale[:,mask], axis=1)
+    mask_size = np.sum(mask > 0)
+    null_ale_mask = np.zeros((null_repeats, mask_size))
+    num_peaks = exp_df.Peaks.values
+    for null_repeat in range(null_repeats):
+        if (null_repeat > 0) and (null_repeat % 1000 == 0):
+            print(f'Simulated {null_repeat} iterations of ROI null')
+        null_peaks = np.array(
+        [
+            sample_space[:, np.random.randint(0, sample_space.shape[1], num_peak)].T
+            for num_peak in num_peaks
+        ],
+        dtype=object,
+        )
+        null_ma = compute_ma(null_peaks, exp_df.Kernels)
+        null_ale = compute_ale(null_ma)
+        null_ale_mask[null_repeat] = null_ale[mask]
+        
 
-            plot_roi_ale(exp_name, mask_names[index], bench_sum, bench_max, null_sum, null_max, null_repeats)
-        else:
-            for value in np.unique(mask)[1:]:
-                bench_sum = np.sum(ale[mask == value])
-                if bench_sum == 0:
-                    continue
-                bench_max = np.max(ale[mask == value])
+    null_sum = np.sum(null_ale_mask, axis=1)
+    null_max = np.max(null_ale_mask, axis=1)
 
-                null_sum = np.sum(null_ale[:,mask == value], axis=1)
-                null_max = np.max(null_ale[:,mask == value], axis=1)
+    plot_roi_ale(exp_name, mask_name, bench_sum, bench_max, null_sum, null_max, null_repeats)
 
-                plot_roi_ale(exp_name, mask_names[index], bench_sum, bench_max, null_sum, null_max, null_repeats, index=value)
 
 def roi_ale_contrast(exp_dfs, exp_names, masks, mask_names, null_repeats):
     s = [list(range(exp_dfs[i].shape[0])) for i in (0,1)]
@@ -65,13 +71,7 @@ def roi_ale_contrast(exp_dfs, exp_names, masks, mask_names, null_repeats):
                 null_max = [np.max(perm_diff[i][mask==value]) for i in range(len(perm_diff))]
         
                 plot_roi_ale(exp_names, mask_names[index], bench_sum, bench_max, null_sum, null_max, null_repeats, index=value)
-            
-            
-def check_rois(exp_dfs, exp_names, masks, mask_names, null_repeats, null_ale=None):
-    if len(exp_dfs) == 2:
-        roi_ale_contrast(exp_dfs, exp_names, masks, mask_names, null_repeats)
-    else:
-        roi_ale(exp_dfs, exp_names, masks, mask_names, null_repeats, null_ale)
+                
         
 def plot_roi_ale(exp_names, mask_name, bench_sum, bench_max, null_sum, null_max, null_repeats, index="Full"):
     fig, ax = plt.subplots(1, 2, figsize=(15,10))
