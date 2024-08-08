@@ -175,7 +175,7 @@ def analysis(
                     exp_names,
                     diff_thresh=diff_thresh,
                     null_repeats=null_repeats,
-                    masking=masking,
+                    nprocesses=nprocesses,
                 )
 
                 if len(masks) > 0:
