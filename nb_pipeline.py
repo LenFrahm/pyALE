@@ -70,7 +70,7 @@ def analysis(
                     null_repeats=null_repeats,
                     nprocesses=nprocesses,
                 )
-                contribution(exp_df, exp_name, exp_idxs, tasks, tfce_enabled)
+                contribution(exp_df, exp_name, tasks, tfce_enabled)
             else:
                 print(f"{exp_name} : only {len(exp_idxs)} experiments - not analyzed!")
 
@@ -139,7 +139,6 @@ def analysis(
                     contribution(
                         exp_dfs[0],
                         exp_names[0],
-                        exp_idxs[0],
                         tasks,
                         tfce_enabled=tfce_enabled,
                     )
@@ -155,7 +154,6 @@ def analysis(
                     contribution(
                         exp_dfs[1],
                         exp_names[1],
-                        exp_idxs[1],
                         tasks,
                         tfce_enabled=tfce_enabled,
                     )
