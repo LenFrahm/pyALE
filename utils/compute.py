@@ -274,34 +274,28 @@ def compute_null_diff(s, prior, exp_dfs, target_n=None, diff_repeats=1000):
 """ Legacy Contrast Computations"""
 
 
-def compute_perm_diff(s, masked_ma):
-    # make list with range of values with amount of studies in both experiments together
-    sr = np.arange(len(s[0]) + len(s[1]))
-    sr = np.random.permutation(sr)
-    # calculate ale difference for this permutation
-    perm_diff = (1 - np.prod(masked_ma[sr[: len(s[0])]], axis=0)) - (
-        1 - np.prod(masked_ma[sr[len(s[0]) :]], axis=0)
-    )
-    return perm_diff
+def compute_perm_diff(group1_num, group2_num, masked_ma):
+    exp_id_perm = np.random.permutation(list(range(group1_num + group2_num)))
+    group1_perm_ale = compute_ale(masked_ma[exp_id_perm[:group1_num]])
+    group2_perm_ale = compute_ale(masked_ma[exp_id_perm[group1_num:]])
+    perm_contrast = group1_perm_ale - group2_perm_ale
+    
+    return perm_contrast
+    
+def compute_sig_diff(ale_diff, perm_diffs, mask, diff_thresh, direction):
 
+    if direction == 'positive':
+        p_map = (perm_diffs > ale_diff).mean(axis=0)
+    if direction == 'negative':
+        p_map = (perm_diffs < ale_diff).mean(axis=0)
 
-def compute_sig_diff(fx, mask, ale_diff, perm_diff, null_repeats, diff_thresh):
-    n_bigger = [
-        np.sum([diff[i] > ale_diff[i] for diff in perm_diff]) for i in range(mask.sum())
-    ]
-    prob_bigger = np.array([x / null_repeats for x in n_bigger])
-
-    z_null = norm.ppf(1 - prob_bigger)  # z-value
-    z_null[np.logical_and(np.isinf(z_null), z_null > 0)] = norm.ppf(1 - EPS)
-    z = np.minimum(
-        fx[mask], z_null
-    )  # for values where the actual difference is consistently higher than the null distribution the minimum will be z and ->
-    sig_idxs = np.argwhere(
-        z > norm.ppf(1 - diff_thresh)
-    ).T  # will most likely be above the threshold of p = 0.05 or z ~ 1.65
-    z = z[sig_idxs]
+    z_map = norm.ppf(1 - p_map)  # z-value
+    z_map[np.logical_and(np.isinf(z_map), z_map > 0)] = norm.ppf(1 - EPS)
+    
+    sig_idxs = np.argwhere(z_map > norm.ppf(1 - diff_thresh)).T
+    z_sig = z_map[sig_idxs]
     sig_idxs = np.argwhere(mask == True)[sig_idxs].squeeze().T
-    return z, sig_idxs
+    return z_sig, sig_idxs
 
 
 """ Plot Utils """
