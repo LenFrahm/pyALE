@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import kurtosis, skew
 import xgboost as xgb
 import os
+import sys
 
 def feature_extraction(nexp, nsub, nfoci):
     nsub_total = np.sum(nsub)
@@ -11,7 +12,7 @@ def feature_extraction(nexp, nsub, nfoci):
     nsub_max = np.max(nsub)
     if nsub_max > 300:
         print('Dataset features parameters that would lead to Out-Of-Distribution prediction: Accuracy can\'t be guaranteed. Please disable cutoff prediction!')
-        exit()
+        sys.exit()
     nsub_min = np.min(nsub)
     nsub_skew = skew(nsub)
     nsub_kurtosis = kurtosis(nsub)
@@ -23,7 +24,7 @@ def feature_extraction(nexp, nsub, nfoci):
     nfoci_max = np.max(nfoci)
     if nfoci_max > 150:
         print('Dataset features parameters that would lead to Out-Of-Distribution cutoff prediction prediction: Accuracy can\'t be guaranteed. Please disable cutoff prediction!')
-        exit()
+        sys.exit()
     nfoci_min = np.min(nfoci)
     nfoci_skew = skew(nfoci)
     nfoci_kurtosis = kurtosis(nfoci)
